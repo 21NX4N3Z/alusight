@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AluSight — AI-Powered Aluminum Defect Inspection</title>
+<meta name="description" content="AluSight ระบบตรวจจับรูพรุนและข้อบกพร่องทางโครงสร้างอะลูมิเนียมด้วยปัญญาประดิษฐ์ กล้องจุลทรรศน์ และ Eddy Current Array พร้อมแผนที่การกระจายและสืบย้อนหลังกระบวนการผลิต">
+<meta property="og:title" content="AluSight — AI-Powered Aluminum Defect Inspection">
+<meta property="og:description" content="ระบบตรวจจับรูพรุนและข้อบกพร่องในอะลูมิเนียมหล่อ ด้วย AI + Optical Microscope + Eddy Current Array">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230071e3'/><circle cx='50' cy='50' r='20' fill='white'/></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top"><span class="dot"></span>AluSight</a>
+    <div class="nav-links">
+      <a href="#problem" class="active">ปัญหา</a>
+      <a href="#innovation">นวัตกรรม</a>
+      <a href="#how">การทำงาน</a>
+      <a href="#prototype">ผลงาน</a>
+      <a href="#results">ผลทดสอบ</a>
+      <a href="#impact">ประโยชน์</a>
+      <a href="#team">ทีม</a>
+    </div>
+    <div class="spacer"></div>
+    <a class="cta" href="#dashboard">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow">Higher Education Innovation Awards 2027 · ด้านวิศวกรรมศาสตร์ เทคโนโลยีปัญญาประดิษฐ์ และอุปกรณ์อัจฉริยะ</span>
+    <h1><span class="grad">AluSight</span></h1>
+    <p class="tag">AI-Powered Aluminum Defect Inspection</p>
+    <p class="sub">ระบบตรวจจับรูพรุนและข้อบกพร่องทางโครงสร้างอะลูมิเนียมหล่อ ด้วยปัญญาประดิษฐ์ + กล้องจุลทรรศน์ (OM) + Eddy Current Array (ECA) พร้อมแผนที่การกระจายตัวและการสืบย้อนหลังกระบวนการผลิต</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#prototype">ดูผลงาน Prototype</a>
+      <a class="btn btn-ghost" href="#dashboard">เปิด Dashboard</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="n">27</div><div class="l">รูพรุนที่ตรวจพบ (ต่อภาพ)</div></div>
+      <div class="hstat"><div class="n">0.60%</div><div class="l">สัดส่วนรูพรุน</div></div>
+      <div class="hstat"><div class="n">23.9 µm</div><div class="l">รูพรุนใหญ่สุด</div></div>
+      <div class="hstat"><div class="n">2 เทคนิค</div><div class="l">OM + Eddy Current</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ PROBLEM ============ -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">01 · ปัญหา</div>
+      <h2 class="sec-title">รูพรุนในอะลูมิเนียมหล่อ</h2>
+      <p class="sec-lead">รูพรุน (Porosity) เป็นข้อบกพร่องที่เกิดขึ้นบ่อยที่สุดในชิ้นงานอะลูมิเนียมหล่อ เกิดจาก 2 สาเหตุหลัก คือ <b>การละลายของก๊าซไฮโดรเจน (H₂)</b> ในโลหะเหลว และ <b>การหดตัวขณะเชื่อมตัวแข็ง (Shrinkage)</b></p>
+    </div>
+    <div class="grid2">
+      <div class="problem-list">
+        <div class="problem-item"><div class="k">1</div><div class="t"><b>ลดความแข็งแรง</b>รูพรุนเป็นจุดเริ่มต้นของรอยแตก ทำให้ชิ้นงานแข็งแรงน้อยลง</div></div>
+        <div class="problem-item"><div class="k">2</div><div class="t"><b>รั่วซึม / ลดความทนทาน</b>รูพรุนเชื่อมต่อกันเป็นช่องว่าง ทำให้ชิ้นงานรั่วซึมและสึกหรอเร็ว</div></div>
+        <div class="problem-item"><div class="k">3</div><div class="t"><b>ต้องเตรียม sample ล่วงหน้า</b>การตรวจแบบดั้งเดิมต้องเฉือน/ขัดจนเป็น cross-section สูญเสียชิ้นงาน</div></div>
+        <div class="problem-item"><div class="k">4</div><div class="t"><b>ไม่สามารถสืบย้อนหลังได้</b>ไม่มีบันทึกข้อมูลการเกิด defect เชิงปริมาณและพิกัด</div></div>
+    </div>
+      <div class="card">
+        <div class="ico">🔬</div>
+        <h3>กลไกการเกิดรูพรุน</h3>
+        <p>ไฮโดรเจนละลายในอะลูมิเนียมเหลวสูงมาก (ประมาณ 20 เท่าของอะลูมิเนียมแข็ง) เมื่อเย็นตัว ก๊าซถูกปัดตัวออก เกิดเป็นฟองก๊าซในโซนเชื่อมตัวแข็งช้า (pasty zone) ประกอบกับการหดตัว ทำให้เกิดรูพรุนขนาดเล็กจำนวนมาก</p>
+        <p style="margin-top:12px">ปัจจัยที่ส่งผล: อุณหภูมิหล่อ · อัตราคูลลิ่ง · การ degas · ปริมาณ H₂ · ส่วนผสม Si / Sr / Ti</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INNOVATION ============ -->
+<section id="innovation">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">02 · นวัตกรรม</div>
+      <h2 class="sec-title">สิ่งที่ AluSight ต่างจากเดิม</h2>
+      <p class="sec-lead">เป็นการรวมภาพจุลทรรศน์ สัญญาณไฟฟ้า และปัญญาประดิษฐ์ เข้าด้วยกันในระบบเดียว พร้อมบันทึกพิกัดและสืบย้อนหลังกระบวนการผลิต</p>
+    </div>
+    <table class="cmp">
+      <thead><tr><th></th><th>วิธีเดิม</th><th>AluSight</th></tr></thead>
+      <tbody>
+        <tr><td>การตรวจ</td><td>ตรวจเฉพาะผิว / เฉือนชิ้นงาน</td><td class="yes">ผิว + ใกล้ผิว + cross-section</td></tr>
+        <tr><td>การวิเคราะห์</td><td>คนดูด้วยตา + ตัวเลขเชิงตัวอย่าง</td><td class="yes">AI จำแนก + ตัวเลขเชิงปริมาณ</td></tr>
+        <tr><td>พิกัด</td><td>ไม่มีการบันทึก</td><td class="yes">บันทึก X,Y ทุกจุด</td></tr>
+        <tr><td>สืบย้อนหลัง</td><td>ไม่ได้</td><td class="yes">ผูกกับกระบวนการผลิต</td></tr>
+        <tr><td>แผนที่</td><td>ไม่มี</td><td class="yes">Microstructure + Electrical Map</td></tr>
+      </tbody>
+    </table>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card"><div class="ico">🧠</div><h3>AI Detection</h3><p>จำแนกรูพรุนและอนุภาคจากภาพจุลทรรศน์อัตโนมัติ พร้อม confidence score</p></div>
+      <div class="card"><div class="ico">🗺️</div><h3>ตำแหน่ง + แผนที่</h3><p>บันทึกพิกัด X,Y ทุกจุด แล้วแสดงเป็น Pore Map และ Electrical Map</p></div>
+      <div class="card"><div class="ico">🔗</div><h3>สืบย้อนหลัง</h3><p>ผูก defect เข้ากับ process parameters เพื่อปรับปรุงการผลิตครั้งใหม่</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">03 · ระบบการทำงาน</div>
+      <h2 class="sec-title">5 ขั้นตอน จากภาพดิบ → ผลลัพธ์</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div class="body"><h4>นำเข้าภาพจุลทรรศน์ (OM)</h4><p>ถ่ายภาพโครงสร้างจุลภาคของอะลูมิเนียมหล่อ พร้อมบันทึกพิกัด stage X,Y, magnification และ scale bar</p></div></div>
+      <div class="step"><div class="num">2</div><div class="body"><h4>วิเคราะห์ภาพ</h4><p>ใช้ Gaussian blur + percentile threshold + morphological opening เพื่อแยกรูพรุนออกจาก matrix แล้วคำนวณ % porosity, จำนวนรู และขนาด</p></div></div>
+      <div class="step"><div class="num">3</div><div class="body"><h4>AI Detection</h4><p>จำแนกและระบุตำแหน่งรูพรุน/อนุภาคด้วย unsupervised clustering + connected components พร้อม confidence score</p></div></div>
+      <div class="step"><div class="num">4</div><div class="body"><h4>Electrical Map (ECA)</h4><p>สแกนชิ้นงานด้วย Eddy Current Array เพื่อได้สัญญาณ amplitude/phase บนกริด X,Y — ใช้ตรวจรอยแตก/รอยผิว (skin depth ~0.27 mm)</p></div></div>
+      <div class="step"><div class="num">5</div><div class="body"><h4>เทียบกัน + สืบย้อนหลัง</h4><p>ผูกข้อมูลรูพรุนจาก OM เข้ากับสัญญาณ ECA ในสเปซพิกัดเดียวกัน แล้วเชื่อมกับ process parameters เพื่อปรับปรุงกระบวนการผลิต</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROTOTYPE ============ -->
+<section id="prototype">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">04 · ผลงาน / Prototype</div>
+      <h2 class="sec-title">ชิ้นงานต้นแบบจริง</h2>
+      <p class="sec-lead">ภาพถ่ายจากชิ้นงานต้นแบบจริง (ไม่ใช่ภาพสร้างด้วย AI) — อุปกรณ์ ชิ้นงาน และหน้าจอระบบ</p>
+    </div>
+    <div class="gallery">
+      <div class="gal"><div class="ph">📷 ภาพจุลทรรศน์ (OM) — รอการถ่ายจริง</div><div class="cap"><b>ภาพ OM</b><br>โครงสร้างจุลภาค + รูพรุน</div></div>
+      <div class="gal"><div class="ph">📷 ชิ้นงานต้นแบบ — รอการถ่ายจริง</div><div class="cap"><b>ชิ้นงาน</b><br>อะลูมิเนียมหล่อ + cross-section</div></div>
+      <div class="gal"><div class="ph">📷 หน้าจอ Dashboard — รอการถ่ายจริง</div><div class="cap"><b>Dashboard</b><br>Microstructure + Electrical Map</div></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <a class="btn btn-primary" href="dashboard.html">เปิด Dashboard เต็ม</a>
+      <span style="font-size:13.5px;color:var(--muted)">Dashboard แสดง Pore Map, Electrical Map, AI Detection และแนวโน้มการผลิต</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">05 · ผลการทดสอบ</div>
+      <h2 class="sec-title">ตัวเลขจากการวิเคราะห์จริง</h2>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="n">27</div><div class="l">รูพรุนที่ตรวจพบ</div></div>
+      <div class="stat"><div class="n">17</div><div class="l">อนุภาค/สารเจือ</div></div>
+      <div class="stat"><div class="n">0.60%</div><div class="l">สัดส่วนรูพรุน</div></div>
+      <div class="stat"><div class="n">23.9 µm</div><div class="l">รูพรุนใหญ่สุด</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>การกระจายขนาดรูพรุน</h3>
+        <div class="bars">
+          <div class="bar-row"><div class="lbl">น้อยกว่า 5 µm</div><div class="track"><div class="fill" style="width:40%"></div></div><div class="val">40%</div></div>
+          <div class="bar-row"><div class="lbl">5 – 10 µm</div><div class="track"><div class="fill" style="width:30%"></div></div><div class="val">30%</div></div>
+          <div class="bar-row"><div class="lbl">10 – 20 µm</div><div class="track"><div class="fill" style="width:20%"></div></div><div class="val">20%</div></div>
+          <div class="bar-row"><div class="lbl">มากกว่า 20 µm</div><div class="track"><div class="fill" style="width:10%"></div></div><div class="val">10%</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>สัญญาณไฟฟ้า (ECA)</h3>
+        <p>ตัวอย่างค่าที่วัดได้จากชิ้นงาน 5 จุด (X,Y เป็น mm):</p>
+        <div class="bars" style="margin-top:14px">
+          <div class="bar-row"><div class="lbl">Amplitude</div><div class="track"><div class="fill" style="width:60%"></div></div><div class="val">0.12–0.35</div></div>
+          <div class="bar-row"><div class="lbl">Phase</div><div class="track"><div class="fill" style="width:45%"></div></div><div class="val">15–31°</div></div>
+        </div>
+        <p style="margin-top:14px">ระบบบันทึกค่าทุกจุดบนกริด X,Y เพื่อสร้าง Electrical Map และเทียบกับ Pore Map</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IMPACT ============ -->
+<section id="impact">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">06 · ประโยชน์</div>
+      <h2 class="sec-title">กลุ่มเป้าหมายและผลลัพธ์</h2>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="ico">🏭</div><h3>โรงหล่ออะลูมิเนียม</h3><p>ลดการเสียชิ้นงาน ลดต้นทุนการตรวจแบบเฉือน และเพิ่มคุณภาพชิ้นงาน</p></div>
+      <div class="card"><div class="ico">⚙️</div><h3>ผู้ผลิตชิ้นส่วน</h3><p>คัดกรองชิ้นงานก่อนส่งมอบ ลดการถูกปฏิเสธและซ่อมเคลม</p></div>
+      <div class="card"><div class="ico">📈</div><h3>ภาครัฐ / มาตรฐาน</h3><p>เป็นเครื่องมือตรวจสอบตามมาตรฐาน (ASTM E505) ได้ด้วยต้นทุนต่ำ</p></div>
+    </div>
+    <div style="margin-top:20px">
+      <h3 style="font-size:16px;margin:0 0 12px">ความสอดคล้องกับ SDGs</h3>
+      <div class="sdg">
+        <span class="pill">🎯 SDG 9 — Industry, Innovation & Infrastructure</span>
+        <span class="pill">🎯 SDG 12 — Responsible Consumption & Production</span>
+        <span class="pill">🎯 SDG 4 — Quality Education</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRL ============ -->
+<section id="trl">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">07 · ระดับความพร้อม</div>
+      <h2 class="sec-title">TRL และ SRL</h2>
+    </div>
+    <div class="trl">
+      <div class="trl-box">
+        <h4>Technology Readiness Level (TRL)</h4>
+        <div class="trl-scale"><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+        <div class="lvl">TRL 6</div>
+        <div class="desc">ตัวแทนสิ่งที่จะส่งมอบ (ต้นแบบที่เสร็จสมบูรณ์) ผ่านการทดสอบและสาธิตในสภาวะที่เกี่ยวข้อง</div>
+      </div>
+      <div class="trl-box">
+        <h4>Societal Readiness Level (SRL)</h4>
+        <div class="trl-scale"><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div></div>
+        <div class="lvl">SRL 5</div>
+        <div class="desc">แนวทางแก้ปัญหาได้รับการตรวจสอบและนำเสนอต่อผู้มีส่วนได้ส่วนเสียในพื้นที่/กลุ่มเป้าหมาย</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section id="team">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">08 · ทีม</div>
+      <h2 class="sec-title">ผู้จัดทำ</h2>
+      <p class="sec-lead">นิสิตและอาจารย์ที่ปรึกษา — สัดส่วนการมีส่วนร่วมรวม 100%</p>
+    </div>
+    <div class="team">
+      <div class="member"><div class="avatar">1</div><div class="name">นิสิตคนที่ 1</div><div class="role">Sample / OM Imaging</div><div class="pct">— %</div></div>
+      <div class="member"><div class="avatar">2</div><div class="name">นิสิตคนที่ 2</div><div class="role">ECA / Electrical Map</div><div class="pct">— %</div></div>
+      <div class="member"><div class="avatar">3</div><div class="name">นิสิตคนที่ 3</div><div class="role">AI / Dashboard</div><div class="pct">— %</div></div>
+    </div>
+    <p style="margin-top:16px;font-size:13.5px;color:var(--muted)">อาจารย์ที่ปรึกษา: — · สถาบัน: —</p>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section id="dashboard">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">09 · Dashboard</div>
+      <h2 class="sec-title">ระบบวิเคราะห์แบบเรียลไทม์</h2>
+      <p class="sec-lead">หน้าแยกที่รวม Microstructure Map, Electrical Map, AI Detection, Pore Map และแนวโน้มการผลิต</p>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <iframe src="dashboard.html" style="width:100%;height:900px;border:0" title="AluSight Dashboard"></iframe>
+    </div>
+    <div style="margin-top:16px"><a class="btn btn-ghost" href="dashboard.html">เปิดในแท็บใหม่ ↗</a></div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-head" style="text-align:center;margin-left:auto;margin-right:auto">
+      <div class="sec-kicker">10 · ติดต่อ</div>
+      <h2 class="sec-title">ติดต่อทีม</h2>
+      <p class="sec-lead">สถาบันการศึกษา: — · อีเมล: — · โทรศัพท์: —</p>
+      <div style="margin-top:18px"><a class="btn btn-primary" href="#top">กลับขึ้นบน ↑</a></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap in">
+    <div><b>AluSight</b> · Higher Education Innovation Awards 2027 · ด้านวิศวกรรมศาสตร์ เทคโนโลยีปัญญาประดิษฐ์ และอุปกรณ์อัจฉริยะ</div>
+    <div>AI + Optical Microscope + Eddy Current Array</div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
