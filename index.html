@@ -1,132 +1,233 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AluSight — เครื่องมือตรวจจับรูพรุนอะลูมิเนียม</title>
-<meta name="description" content="AluSight เครื่องมืออัปโหลดภาพจุลทรรศน์และตรวจจับรูพรุน/ข้อบกพร่องในอะลูมิเนียมหล่อ ด้วย AI และ image analysis">
-<meta property="og:title" content="AluSight — เครื่องมือตรวจจับรูพรุนอะลูมิเนียม">
-<meta property="og:description" content="อัปโหลดภาพ OM → ตรวจจับรูพรุนด้วย AI → ดูแผนที่และสถิติ">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230071e3'/><circle cx='50' cy='50' r='20' fill='white'/></svg>">
+<title>AluSight v2 — ตรวจจับข้อบกพร่องอะลูมิเนียม</title>
+<meta name="description" content="AluSight v2 — วิเคราะห์ภาพจุลทรรศน์ ตรวจจับรูพรุน วัดสัญญาณ ECA หลายตำแหน่ง กราฟความสัมพันธ์ และ Root Cause Analysis">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%232f81f7'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<nav class="nav">
+<a class="skip" href="#main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<nav class="nav" aria-label="หลัก">
   <div class="nav-in">
-    <a class="brand" href="#top"><span class="dot"></span>AluSight</a>
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>AluSight<span class="ver">v2</span></a>
     <div class="nav-links">
-      <a href="#tool" class="active">เครื่องมือ</a>
-      <a href="#params">พารามิเตอร์</a>
-      <a href="#results">ผลลัพธ์</a>
+      <a href="#workbench" class="active">工作台</a>
+      <a href="#zones">พื้นที่วัด</a>
+      <a href="#chart">กราฟความสัมพันธ์</a>
+      <a href="#fea">แผนที่ FEA</a>
+      <a href="#rca">RCA</a>
       <a href="dashboard.html">Dashboard</a>
     </div>
     <div class="spacer"></div>
-    <a class="cta" href="#tool">เริ่มวิเคราะห์</a>
+    <button id="themeToggle" class="theme-btn" type="button" role="switch" aria-checked="true" aria-label="สลับโหมดมืด">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9c0-.5-.04-1-.12-1.47A7 7 0 0 1 12.47 3.12C12.3 3.04 12.15 3 12 3Z"/></svg>
+      <span id="themeLabel">โหมดมืด</span>
+    </button>
   </div>
 </nav>
 
-<header class="hero" id="top" style="padding:48px 0 32px">
+<header class="hero" id="top">
   <div class="wrap">
-    <span class="eyebrow">AI + Optical Microscope · เครื่องมือวิเคราะห์</span>
-    <h1 style="font-size:clamp(34px,5.5vw,60px)"><span class="grad">AluSight Tool</span></h1>
-    <p class="tag">อัปโหลดภาพจุลทรรศน์ (OM) → ตรวจจับรูพรุนและข้อบกพร่องด้วย AI</p>
-    <p class="sub">วิเคราะห์ทั้งหมดในเบราว์เซอร์ของคุณ — ไม่อัปโหลดข้อมูลไปที่เซิร์ฟเวอร์</p>
+    <span class="eyebrow">AI + Optical Microscope + Eddy Current Array</span>
+    <h1>AluSight v2</h1>
+    <p class="tag">ตรวจจับรูพรุน วิเคราะห์สัญญาณไฟฟ้า หาสาเหตุ — ในหน้าเดียว</p>
+    <div class="hero-meta">
+      <span class="pill"><span class="pdot ok" aria-hidden="true"></span>พร้อมใช้งาน</span>
+      <span class="pill">กำหนดส่ง: วันจันทร์</span>
+      <span class="pill">7 แหล่งข้อมูลอ้างอิง</span>
+    </div>
   </div>
 </header>
 
-<!-- ============ TOOL ============ -->
-<section id="tool" style="padding-top:24px">
-  <div class="wrap">
-    <div class="tool-grid">
-
-      <!-- LEFT: input -->
-      <div>
-        <div class="card" style="margin-bottom:16px">
-          <h3 style="margin-top:0">① อัปโหลดภาพจุลทรรศน์</h3>
-          <div id="drop" class="drop">
-            <div class="drop-in">
-              <div style="font-size:38px;margin-bottom:8px">📁</div>
-              <div style="font-weight:600">ลากไฟล์มาวาง หรือคลิกเพื่อเลือก</div>
-              <div style="font-size:13px;color:var(--muted);margin-top:4px">รองรับ JPG / PNG / BMP / TIFF (ภาพ OM ที่ขัดเตรียมเสร็จ)</div>
-              <input type="file" id="file" accept="image/*" style="display:none">
-            </div>
-          </div>
-          <div style="margin-top:14px">
-            <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">หรือลองด้วยภาพตัวอย่าง:</div>
-            <div class="samples">
-              <button class="sample" data-key="om_raw">ตัวอย่าง 1 (OM)</button>
-              <button class="sample" data-key="om_overlay">ตัวอย่าง 2 (ผลวิเคราะห์)</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" id="params">
-          <h3 style="margin-top:0">② พารามิเตอร์</h3>
-          <label class="lbl">Threshold percentile (รูพรุน = จุดดำ)</label>
-          <input type="range" id="pct" min="1" max="10" step="0.5" value="3">
-          <div class="valrow"><span>ต่ำ (พบมากกว่า)</span><span id="pctVal">3.0%</span><span>สูง</span></div>
-          <label class="lbl" style="margin-top:14px">ขนาดรูพรุนขั้นต่ำ (µm)</label>
-          <input type="range" id="minArea" min="0" max="20" step="1" value="4">
-          <div class="valrow"><span>0</span><span id="minAreaVal">4 µm</span><span>20</span></div>
-          <label class="lbl" style="margin-top:14px">สเกล (µm ต่อ 100 px)</label>
-          <input type="range" id="scale" min="10" max="100" step="5" value="25">
-          <div class="valrow"><span>10</span><span id="scaleVal">25 µm/100px</span><span>100</span></div>
-          <button class="btn btn-primary" id="run" style="width:100%;margin-top:18px;justify-content:center">วิเคราะห์ภาพ</button>
-          <div id="status" style="margin-top:12px;font-size:13px;color:var(--muted);text-align:center"></div>
-        </div>
-      </div>
-
-      <!-- RIGHT: output -->
-      <div id="results">
-        <div class="card" style="padding:0;overflow:hidden">
-          <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-            <b>③ ผลการวิเคราะห์</b>
-            <span id="detBadge" style="margin-left:auto;font-size:12px;font-weight:700;color:var(--accent);background:rgba(0,113,227,.09);padding:4px 10px;border-radius:999px">—</span>
-          </div>
-          <div class="canvas-wrap">
-            <canvas id="out"></canvas>
-            <div id="empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:20px">อัปโหลดภาพเพื่อเริ่มวิเคราะห์<br><span style="font-size:12.5px">หรือเลือกภาพตัวอย่าง</span></div>
-          </div>
-          <div class="legend">
-            <span><i style="background:var(--red)"></i>รูพรุน (Pore)</span>
-            <span><i style="background:#2563eb"></i>อนุภาค (Inclusion)</span>
-          </div>
-        </div>
-
-        <div class="stat-row" id="stats" style="grid-template-columns:repeat(4,1fr);margin-top:16px">
-          <div class="stat"><div class="n" id="sPores">–</div><div class="l">รูพรุน</div></div>
-          <div class="stat"><div class="n" id="sIncl">–</div><div class="l">อนุภาค</div></div>
-          <div class="stat"><div class="n" id="sPct">–</div><div class="l">% porosity</div></div>
-          <div class="stat"><div class="n" id="sMax">–</div><div class="l">รูใหญ่สุด</div></div>
-        </div>
-
-        <div class="card" style="margin-top:16px">
-          <h3 style="margin-top:0">รายการที่ตรวจพบ</h3>
-          <div id="detList" style="font-size:13px;color:var(--muted)">ยังไม่มีข้อมูล — วิเคราะห์ภาพก่อน</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ============ MAP ============ -->
-<section id="map">
+<main id="main">
+<section id="workbench" aria-labelledby="wb-h">
   <div class="wrap">
     <div class="sec-head">
-      <div class="sec-kicker">แผนที่</div>
-      <h2 class="sec-title">Pore Map — การกระจายบนชิ้นงาน</h2>
+      <div class="sec-kicker">ขั้นตอนที่ 1–2</div>
+      <h2 class="sec-title" id="wb-h">ข้อมูลชิ้นงาน และภาพ OM</h2>
+      <p class="sec-lead">กรอกข้อมูลทั่วไปครั้งเดียว อัปโหลดภาพจุลทรรศน์ แล้วกดวิเคราะห์เพื่อให้ระบบตรวจจับตำแหน่งรูพรุนโดยอัตโนมัติ</p>
     </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <svg id="poreMap" viewBox="0 0 800 400" style="width:100%;height:auto;display:block;background:var(--surface)"></svg>
+    <div class="grid-2">
+      <div class="card">
+        <h3>ข้อมูลทั่วไป <span class="tag-sm">กรอกครั้งเดียว</span></h3>
+        <div class="form-grid">
+          <label class="field"><span>รหัสชิ้นงาน / Batch</span><input id="gBatch" type="text" value="BP18-AL-001" autocomplete="off"></label>
+          <label class="field"><span>เกรดวัสดุ</span><input id="gGrade" type="text" value="ADC12" autocomplete="off"></label>
+          <label class="field"><span>ความยาว (mm)</span><input id="gLen" type="number" min="1" step="1" value="150"></label>
+          <label class="field"><span>ความกว้าง (mm)</span><input id="gWid" type="number" min="1" step="1" value="100"></label>
+          <label class="field"><span>ความหนา (mm)</span><input id="gThk" type="number" min="1" step="0.1" value="6"></label>
+          <label class="field"><span>Process</span><input id="gProc" type="text" value="Die Casting" autocomplete="off"></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>ภาพจุลทรรศน์ (OM)</h3>
+        <div id="drop" class="drop" role="button" tabindex="0" aria-label="เลือกหรือวางภาพจุลทรรศน์">
+          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V5h14v14ZM7 15l3.5-4.5 2.5 3 3-4 4 5.5H7Z"/></svg>
+          <div class="drop-t">วางภาพที่นี่ หรือคลิกเพื่อเลือก</div>
+          <div class="drop-s">JPG / PNG / BMP / TIFF · ประมวลผลในเบราว์เซอร์</div>
+          <input type="file" id="file" accept="image/*" style="display:none">
+        </div>
+        <div class="samples">
+          <button class="sample" type="button" data-key="om_raw">ตัวอย่างภาพดิบ</button>
+          <button class="sample" type="button" data-key="om_overlay">ตัวอย่างผลวิเคราะห์</button>
+        </div>
+        <div class="params">
+          <label class="field"><span>Threshold percentile</span><input type="range" id="pct" min="1" max="10" step="0.5" value="3"><output id="pctVal">3.0%</output></label>
+          <label class="field"><span>ขนาดรูพรุนขั้นต่ำ (µm)</span><input type="range" id="minArea" min="0" max="20" step="1" value="4"><output id="minAreaVal">4 µm</output></label>
+          <label class="field"><span>สเกล (µm / 100 px)</span><input type="range" id="scale" min="10" max="100" step="5" value="25"><output id="scaleVal">25 µm/100px</output></label>
+        </div>
+        <button class="btn btn-primary" id="run" type="button">วิเคราะห์ภาพ</button>
+        <p class="status" id="status" role="status" aria-live="polite">ยังไม่มีภาพ — เลือกตัวอย่างหรืออัปโหลด</p>
+      </div>
+    </div>
+    <div class="panel mt-4">
+      <div class="panel-h"><h3>ผลการตรวจจับ</h3><span class="badge" id="detBadge">—</span></div>
+      <div class="analysis-grid">
+        <div class="canvas-wrap">
+          <canvas id="out" aria-label="ภาพผลการตรวจจับ"></canvas>
+          <div id="empty" class="empty">อัปโหลดภาพเพื่อเริ่มวิเคราะห์</div>
+        </div>
+        <div>
+          <div class="stat-grid">
+            <div class="stat"><div class="n" id="sPores">–</div><div class="l">รูพรุน</div></div>
+            <div class="stat"><div class="n" id="sIncl">–</div><div class="l">อนุภาค</div></div>
+            <div class="stat"><div class="n" id="sPct">–</div><div class="l">% porosity</div></div>
+            <div class="stat"><div class="n" id="sMax">–</div><div class="l">รูใหญ่สุด (µm)</div></div>
+          </div>
+          <div class="card mt-4">
+            <h4>ตำแหน่งที่ตรวจพบ <span class="tag-sm">เรียงตามขนาด</span></h4>
+            <div id="detList" class="muted">ยังไม่มีข้อมูล — วิเคราะห์ภาพก่อน</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-4">
+      <h3>Pore Map — การกระจายบนชิ้นงาน</h3>
+      <svg id="poreMap" viewBox="0 0 800 400" role="img" aria-label="แผนที่กระจายรูพรุน"></svg>
     </div>
   </div>
 </section>
+
+<section id="zones" aria-labelledby="z-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">ขั้นตอนที่ 3</div>
+      <h2 class="sec-title" id="z-h">พื้นที่วัดสัญญาณ ECA</h2>
+      <p class="sec-lead">กรอก Voltage และ Current ของแต่ละบริเวณ ระบบจะคำนวณความต้านทาน (R = V/I) และเปรียบเทียบจุดปกติกับจุดที่เกิดดีเฟค — กดเพิ่มบริเวณได้ตามต้องการ</p>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn btn-ghost" id="addZone" type="button">+ เพิ่มบริเวณ</button>
+        <button class="btn btn-ghost" id="autoZone" type="button">เติมจากผลตรวจจับ</button>
+        <span class="spacer"></span>
+        <span class="muted" id="zoneCount">0 บริเวณ</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="zoneTable">
+          <thead><tr><th>บริเวณ</th><th>Voltage (V)</th><th>Current (A)</th><th>R (Ω)</th><th>สภาพ</th><th>% porosity</th><th></th></tr></thead>
+          <tbody id="zoneBody"><tr><td colspan="7" class="muted">ยังไม่มีบริเวณ — กด "เพิ่มบริเวณ"</td></tr></tbody>
+        </table>
+      </div>
+      <p class="note">ความต้านทานคำนวณจาก V/I · % porosity มาจากผลวิเคราะห์ภาพ หรือกรอกเองถ้ายังไม่มีภาพ</p>
+    </div>
+  </div>
+</section>
+
+<section id="chart" aria-labelledby="c-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">ขั้นตอนที่ 4</div>
+      <h2 class="sec-title" id="c-h">กราฟความสัมพันธ์ % รูพรุน ↔ ความต้านทานไฟฟ้า</h2>
+      <p class="sec-lead">แต่ละจุดแทนหนึ่งบริเวณที่วัด — แนวโน้มจะบอกว่าความต้านทานเพิ่มขึ้นเมื่อเนื้อวัสดุมีรูพรุนมากขึ้นหรือไม่</p>
+    </div>
+    <div class="card">
+      <svg id="resChart" viewBox="0 0 800 420" role="img" aria-label="กราฟความสัมพันธ์ระหว่างเปอร์เซ็นต์รูพรุนและความต้านทาน"></svg>
+      <div class="chart-legend">
+        <span><i class="swatch defect" aria-hidden="true"></i>จุดดีเฟค</span>
+        <span><i class="swatch normal" aria-hidden="true"></i>จุดปกติ</span>
+        <span><i class="swatch trend" aria-hidden="true"></i>แนวโน้ม (regression)</span>
+        <span class="spacer"></span>
+        <span class="muted" id="corrVal">r = —</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="fea" aria-labelledby="f-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">ขั้นตอนที่ 5</div>
+      <h2 class="sec-title" id="f-h">แผนที่ความเสียหายแบบ FEA</h2>
+      <p class="sec-lead">มองภาพรวมชิ้นงานเป็นตารางความหนาแน่นของข้อบกพร่อง ช่วยระบุบริเวณที่เสี่ยงก่อนส่งตรวจจริง</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <svg id="feaMap" viewBox="0 0 640 360" role="img" aria-label="แผนที่ความเสียหายแบบ FEA"></svg>
+        <div class="scale-bar"><span>ต่ำ</span><span class="gradient" aria-hidden="true"></span><span>สูง</span></div>
+      </div>
+      <div class="card">
+        <h3>สรุปความเสี่ยง</h3>
+        <div class="stat-grid one">
+          <div class="stat"><div class="n" id="riskScore">—</div><div class="l">Risk Score (0–100)</div></div>
+        </div>
+        <p id="riskText" class="muted mt-4">เพิ่มบริเวณวัดเพื่อดูผลประเมิน</p>
+        <h4 class="mt-4">บริเวณเสี่ยงสูงสุด</h4>
+        <div id="hotspot" class="muted">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rca" aria-labelledby="r-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">ขั้นตอนที่ 6</div>
+      <h2 class="sec-title" id="r-h">Root Cause Analysis</h2>
+      <p class="sec-lead">ชุดข้อมูลพารามิเตอร์สายการผลิต พร้อม Label ชิ้นงานดี/เสีย — ใช้หาสาเหตุของรูพรุนและแนวโน้มการปรับปรุงกระบวนการ</p>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn btn-ghost" id="addRca" type="button">+ เพิ่ม record</button>
+        <span class="spacer"></span>
+        <span class="muted" id="rcaCount">0 record</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="rcaTable">
+          <thead><tr><th>#</th><th>อุณหภูมิ (°C)</th><th>แรงดัน (bar)</th><th>เวลา cooling (s)</th><th>ความเร็วฉีด (mm/s)</th><th>Label</th><th></th></tr></thead>
+          <tbody id="rcaBody"><tr><td colspan="7" class="muted">ยังไม่มี record — กด "เพิ่ม record"</td></tr></tbody>
+        </table>
+      </div>
+      <div class="toolbar mt-4">
+        <button class="btn btn-primary" id="exportJson" type="button">ส่งออก JSON</button>
+        <button class="btn btn-ghost" id="exportCsv" type="button">ส่งออก CSV</button>
+        <span class="spacer"></span>
+        <span class="muted" id="exportStatus"></span>
+      </div>
+    </div>
+    <div class="card mt-4">
+      <h3>แหล่งข้อมูลอ้างอิง <span class="tag-sm">จากแชททีม</span></h3>
+      <ul class="refs">
+        <li><a href="https://www.kaggle.com/datasets" target="_blank" rel="noopener">Kaggle — ชุดข้อมูลภาพริ้วรอย / รอยขูดขีดบนโปรไฟล์อะลูมิเนียม</a> <span class="muted">(ลิงก์ในแชท: kaggle.com/d…)</span></li>
+        <li><a href="https://zenodo.org/records/12568603" target="_blank" rel="noopener">Zenodo 12568603 — ชุดข้อมูลรูพรุนในชิ้นงานอะลูมิเนียม</a></li>
+        <li><a href="https://data.mendeley.com/datasets/9t8pzw2995/1" target="_blank" rel="noopener">Mendeley 9t8pzw2995 — ภาพรูพรุนจากกล้อง OM</a></li>
+        <li><a href="https://www.mdpi.com/journal/materials" target="_blank" rel="noopener">MDPI Materials — การวิเคราะห์ขนาดและรูปร่างรูพรุนด้วยภาพ OM</a></li>
+        <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10004325/" target="_blank" rel="noopener">PMC10004325 — บทความวิเคราะห์ข้อบกพร่องอะลูมิเนียม</a></li>
+        <li><a href="https://methodist.edu.in/web/uploads/files/castingdefects-171116160842.pdf" target="_blank" rel="noopener">Casting Defects — เอกสารประเภทข้อบกพร่องจากการหล่อ</a></li>
+        <li><span class="muted">Materials Defect Analysis — รอยพุพอง (Blister), การแยกชั้น, การกัดกร่อน</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
 
 <footer>
   <div class="wrap in">
-    <div><b>AluSight</b> · เครื่องมือตรวจจับรูพรุนอะลูมิเนียม · Higher Education Innovation Awards 2027</div>
+    <div><b>AluSight v2</b> · ตรวจจับข้อบกพร่องอะลูมิเนียม · Higher Education Innovation Awards 2027</div>
     <div>วิเคราะห์ในเบราว์เซอร์ · ไม่อัปโหลดข้อมูล</div>
   </div>
 </footer>
