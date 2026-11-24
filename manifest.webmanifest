@@ -1,0 +1,19 @@
+{
+  "name": "AluSight v2 — ตรวจจับข้อบกพร่องอะลูมิเนียม",
+  "short_name": "AluSight",
+  "description": "เครื่องมือวิเคราะห์ภาพจุลทรรศน์ สัญญาณ ECA และ Root Cause Analysis สำหรับชิ้นงานอะลูมิเนียมหล่อ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1118",
+  "theme_color": "#126287",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23126287'/><circle cx='96' cy='96' r='40' fill='%23ffffff'/><circle cx='96' cy='96' r='16' fill='%23126287'/></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

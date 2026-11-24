@@ -164,6 +164,15 @@ table.data select{height:36px;padding:0 8px;border-radius:8px;border:1px solid v
 .scale-bar{display:flex;align-items:center;gap:12px;margin-top:16px;font-size:14px;color:var(--muted)}
 .scale-bar .gradient{flex:1;height:12px;border-radius:4px;background:linear-gradient(90deg,var(--surface),var(--accent))}
 
+/* production extras */
+.session-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.session-bar .btn{width:auto}
+.cal-row{display:flex;align-items:end;gap:12px;margin-bottom:8px}
+.cal-row .field{flex:1}
+.batch-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.batch-row .btn{width:auto}
+.canvas-wrap.calibrating canvas{cursor:crosshair}
+
 /* footer */
 footer{padding:32px 0;background:var(--surface);border-top:1px solid var(--border);color:var(--muted);font-size:14px}
 footer .in{display:flex;gap:24px;flex-wrap:wrap;justify-content:space-between;align-items:center}
@@ -177,4 +186,11 @@ footer b{color:var(--text)}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *{transition:none!important;animation:none!important}
+}
+@media print{
+  .nav,.skip,footer,.session-bar,.toolbar,.samples,.cal-row,.batch-row,.status,.btn{display:none!important}
+  body{background:#ffffff;color:#14202e}
+  section{padding:24px 0;border-bottom:1px solid #cdd8e4}
+  .card,.panel{break-inside:avoid}
+  .dark{--bg:#ffffff;--surface:#f2f5f9;--surface-2:#ffffff;--text:#14202e;--muted:#5b6b7d;--border:#cdd8e4}
 }

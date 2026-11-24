@@ -1,48 +1,79 @@
-# AluSight v2
+# AluSight v2 — Production Ready
 
 **AI-Powered Aluminum Defect Inspection** — ตรวจจับรูพรุน/รอยบกพร่องในอะลูมิเนียมหล่อ ด้วยกล้องจุลทรรศน์ (OM) + Eddy Current Array (ECA) + Root Cause Analysis
 
-ผลงานเข้าร่วมประกวด **นวัตกรรมสายอุดมศึกษา ประจำปี 2570 (Higher Education Innovation Awards 2027)** ด้านวิศวกรรมศาสตร์ เทคโนโลยีปัญญาประดิษฐ์ และอุปกรณ์อัจฉริยะ
+ผลงานเข้าร่วม **Higher Education Innovation Awards 2027** · **Live:** https://alusight.vercel.app
 
-> **Live:** https://alusight.vercel.app
+---
 
-## สิ่งที่เพิ่มใน v2 (อ้างอิงสเปกจากแชททีม 22 พ.ย. 2026)
+## 1. ความพร้อมใช้งานจริง
 
-| ฟีเจอร์ | รายละเอียด |
-|---|---|
-| ข้อมูลชิ้นงาน | รหัส Batch, เกรด, ความยาว/กว้าง/หนา, Process — กรอกครั้งเดียว |
-| ตรวจจับอัตโนมัติ | OM image → grayscale → blur → percentile threshold → morphology → connected components → รูพรุน/อนุภาค พร้อม ⌀, ตำแหน่ง, พื้นที่ |
-| พื้นที่วัด ECA หลายบริเวณ | กดเพิ่มบริเวณได้ · กรอก Voltage/Current · คำนวณ **R = V/I** · ระบุสภาพ ปกติ/ดีเฟค |
-| เติมจากผลตรวจจับ | แบ่งภาพเป็น 6 โซน แล้วกรอก % porosity ให้อัตโนมัติจากตำแหน่งที่พบรูพรุน |
-| กราฟความสัมพันธ์ | % porosity ↔ ความต้านทานไฟฟ้า พร้อมแนวโน้ม regression และค่า r |
-| แผนที่ FEA | Heatmap ความหนาแน่นข้อบกพร่อง + Risk Score (0–100) + บริเวณเสี่ยงสูงสุด |
-| Root Cause Analysis | ตาราง record: อุณหภูมิ / แรงดัน / เวลา cooling / ความเร็วฉีด / Label ดี-เสีย |
-| ส่งออกข้อมูล | JSON (session ทั้งหมด) และ CSV (ตารางโซนวัด) |
-| Theme | สลับโหมดมืด/สว่าง พร้อม redraw กราฟและแผนที่ |
-| แหล่งข้อมูลอ้างอิง | รวม 7 แหล่งจากแชท (Kaggle, Zenodo, Mendeley, MDPI, PMC, Casting Defects, Materials Defect Analysis) |
+| เรื่อง | สถานะ | รายละเอียด |
+|---|---|---|
+| ประมวลผลภาพ | พร้อม | client-side pipeline: grayscale → blur → percentile threshold → morphology → connected components ผลลัพธ์: จำนวนรูพรุน/อนุภาค, ⌀, ตำแหน่ง, % porosity |
+| ปรับเทียบสเกล | พร้อม | คลิก 2 จุดบนมาตราอ้างอิง กรอกความยาวจริง (µm) → คำนวณ µm/px แทนการเดาจาก slider |
+| วัด ECA หลายบริเวณ | พร้อม | เพิ่ม/ลบบริเวณ, กรอก V/I, คำนวณ R = V/I, ระบุ ปกติ/ดีเฟค |
+| เชื่อมเครื่องจริง | พร้อม (Chrome/Edge) | **WebSerial** อ่านบรรทัด `V:5.12,I:0.43` หรือ `5.12,0.43` ที่ 9600 baud → เติมโซนแรกอัตโนมัติ |
+| กราฟความสัมพันธ์ | พร้อม | % porosity ↔ R พร้อม regression, correlation r |
+| แผนที่ FEA | พร้อม | heatmap 10×6 + Risk Score + hotspot |
+| RCA | พร้อม | ตาราง record อุณหภูมิ/แรงดัน/cooling/ความเร็วฉีด/Label ดี-เสีย |
+| บันทึกข้อมูล | พร้อม | auto-save ลง localStorage, กู้คืนตอนเปิดใหม่, นำเข้า/ส่งออก JSON |
+| วิเคราะห์ชุดภาพ | พร้อม | เลือกหลายไฟล์ → ตารางผลแต่ละภาพ รวม error case |
+| รายงาน | พร้อม | ปุ่มพิมพ์รายงาน (print CSS ตัด UI ออก) + CSV สำหรับ zone และ RCA |
+| Offline / PWA | พร้อม | manifest + service worker (cache-first สำหรับ asset, network-first สำหรับหน้าเว็บ) |
+| Accessibility | ผ่าน gate 12/12 | WCAG-focused: focus ring, reduced-motion, contrast, ไม่มี emoji, semantic h1/h2, 4pt grid |
 
-## โครงสร้างไฟล์
-
-```
-index.html      หน้าเว็บหลัก — workbench / zones / chart / FEA / RCA / references
-styles.css      design tokens (light + dark), 4pt grid, focus ring, reduced-motion
-app.js          image pipeline + zone/state + chart + heatmap + RCA + export
-samples.js      ภาพตัวอย่างแบบ base64 (om_raw, om_overlay)
-dashboard.html  dashboard วิเคราะห์ข้อมูลเดิม
-README.md       ไฟล์นี้
-```
-
-## รันในเครื่อง
+## 2. รันในเครื่อง
 
 ```bash
+cd C:\Users\azzin\AluSight
 python -m http.server 8899
 # เปิด http://127.0.0.1:8899
 ```
 
-หรือเปิด `index.html` โดยตรง (บางเบราว์เซอร์บล็อก canvas สำหรับ file:// แนะนำใช้เซิร์ฟเวอร์)
+> ใช้เซิร์ฟเวอร์เสมอสำหรับ WebSerial และ service worker (file:// ไม่รองรับ)
 
-## หมายเหตุ
+## 3. Workflow ที่แนะนำ
 
-- ประมวลผลทั้งหมดในเบราว์เซอร์ — ไม่มีการอัปโหลดภาพหรือข้อมูลไปเซิร์ฟเวอร์
-- ค่า % porosity มาจากการประมาณจากภาพ ควรเทียบกับผลทดสอบจริงก่อนใช้ตัดสินใจ
-- ไฟล์ `.eimg` ใน LINE Cache เป็นรูปแบบเข้ารหัสของ LINE — ต้องใช้ปุ่ม Save ในแชทเพื่อได้ไฟล์ต้นฉบับ
+1. กรอกข้อมูลชิ้นงาน (Batch / เกรด / ขนาด) — บันทึกอัตโนมัติ
+2. โหลดภาพ OM → กด **ปรับเทียบสเกลจากภาพ** → คลิก 2 จุดของมาตราอ้างอิง → ใส่ µm จริง
+3. กด **วิเคราะห์ภาพ** → ได้รูพรุน/อนุภาค + % porosity
+4. ที่ **พื้นที่วัด ECA**: กดเพิ่มบริเวณ หรือ **เติมจากผลตรวจจับ** → เสียบเครื่องแล้วกด **เชื่อมเครื่อง ECA**
+5. ดูกราฟความสัมพันธ์และแผนที่ FEA → บันทึก record ลง RCA
+6. **พิมพ์รายงาน** หรือส่งออก JSON/CSV เก็บผล
+
+## 4. รูปแบบข้อมูลที่รองรับ
+
+- ภาพ: JPG / PNG / BMP / TIFF (ลดขนาดเหลือ max 1024 px สำหรับ performance)
+- Serial: `V:5.12,I:0.43` · `V=5.12 I=0.43` · `5.12,0.43` · `5.12;0.43` ที่ 9600 baud
+- นำเข้า JSON: โครงสร้างเดียวกับที่ส่งออก (`general`, `params`, `zones`, `rca`, `batch`)
+
+## 5. ข้อจำกัดที่ต้องรู้ ( honesty notes )
+
+- โปรแกรมนี้ใช้ **image analysis แบบดั้งเดิม (threshold + morphology)** ไม่ใช่โมเดล deep learning ที่เทรนแล้ว — ค่า porosity เป็นค่าประมาณ ต้องเทียบกับผล OM จริงก่อนใช้ตัดสินใจ
+- WebSerial ต้องใช้ **Chrome/Edge** และผู้ใช้ต้องกดปุ่มด้วยตนเอง (browser permission) — การเรียก `.click()` จากสคริปต์จะถูกปฏิเสธ
+- ภาพในแชท LINE เก็บเป็น `.eimg` ที่เข้ารหัส ต้องกด Save ในแชทเพื่อได้ไฟล์ต้นฉบับ
+- ลิงก์ Kaggle ในแชทถูกตัดเป็น `kaggle.com/d…` จึงไม่ได้เดา URL เต็ม
+- LocalStorage อยู่ใน browser profile ของผู้ใช้เท่านั้น — ส่งออก JSON หากต้องย้ายเครื่อง
+
+## 6. โครงสร้างไฟล์
+
+```
+index.html            6 sections + session bar + references
+styles.css            tokens light/dark, focus, reduced-motion, print CSS
+app.js                image pipeline, zones, chart, FEA, RCA, persistence,
+                      calibration, batch, WebSerial, import/export, SW register
+samples.js            ภาพตัวอย่าง base64
+sw.js                 service worker (cache alusight-v2-r2)
+manifest.webmanifest  PWA manifest
+dashboard.html        dashboard เดิม
+README.md             ไฟล์นี้
+```
+
+## 7. Deploy
+
+```bash
+git add -A && git commit -m "..." && git push origin master:main
+vercel deploy --prod --yes
+# ตรวจสอบ: curl -s https://alusight.vercel.app | grep 'AluSight v2'
+```

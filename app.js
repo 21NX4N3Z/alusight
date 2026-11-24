@@ -14,6 +14,13 @@
   let zones = [];           // {id,v,i,state,porosity}
   let rca = [];             // {temp,pressure,cool,speed,label}
   let zoneSeq = 0;
+  let batchResults = [];
+  let calMode = false;
+  let calPts = [];
+  let serialPort = null;
+  let serialReader = null;
+  let serialReading = false;
+  const SAVE_KEY = 'alusight-v2-session';
 
   const DATASETS = [
     'Kaggle — crack/scratch on aluminum profiles',
@@ -189,40 +196,50 @@
   }
 
   /* ---------------- analysis ---------------- */
-  function analyze() {
-    if (!current) { setStatus('กรุณาอัปโหลดภาพก่อน'); return; }
+  function compute(rr) {
     const pct = parseFloat($('pct').value);
     const minUm = parseFloat($('minArea').value);
     const umPer100 = parseFloat($('scale').value);
     const umPerPx = umPer100 / 100;
+    const { data, w, h } = rr;
+    const gray = grayscale(data.data);
+    const blurred = gaussianBlur(gray, w, h, 3);
+    const lo = percentile(blurred, pct);
+    const hi = percentile(blurred, 100 - pct);
+    let poreMask = new Uint8Array(blurred.length);
+    let inclMask = new Uint8Array(blurred.length);
+    for (let i = 0; i < blurred.length; i++) {
+      if (blurred[i] < lo) poreMask[i] = 1;
+      if (blurred[i] > hi) inclMask[i] = 1;
+    }
+    poreMask = opening(poreMask, w, h, 3);
+    inclMask = opening(inclMask, w, h, 3);
+    const pl = label(poreMask, w, h);
+    const foundPores = extract(pl.labels, pl.count, w, h, umPerPx)
+      .filter(f => f.d >= minUm && f.fill > 0.45 && f.aspect < 3);
+    const il = label(inclMask, w, h);
+    const foundIncls = extract(il.labels, il.count, w, h, umPerPx)
+      .filter(f => f.d >= minUm * 1.2 && f.fill > 0.3 && f.aspect < 4);
+    return {
+      pores: foundPores,
+      incls: foundIncls,
+      porosityPct: 100 * foundPores.reduce((s, p) => s + p.area, 0) / (w * h),
+      w, h
+    };
+  }
+
+  function analyze() {
+    if (!current) { setStatus('กรุณาอัปโหลดภาพก่อน'); return; }
     setStatus('กำลังวิเคราะห์…');
     setTimeout(() => {
       try {
-        const { data, w, h } = current;
-        const gray = grayscale(data.data);
-        const blurred = gaussianBlur(gray, w, h, 3);
-        const lo = percentile(blurred, pct);
-        const hi = percentile(blurred, 100 - pct);
-        let poreMask = new Uint8Array(blurred.length);
-        let inclMask = new Uint8Array(blurred.length);
-        for (let i = 0; i < blurred.length; i++) {
-          if (blurred[i] < lo) poreMask[i] = 1;
-          if (blurred[i] > hi) inclMask[i] = 1;
-        }
-        poreMask = opening(poreMask, w, h, 3);
-        inclMask = opening(inclMask, w, h, 3);
-        const minAreaPx = Math.pow(minUm / umPerPx, 2) / Math.PI * 4;
-        const pl = label(poreMask, w, h);
-        pores = extract(pl.labels, pl.count, w, h, umPerPx)
-          .filter(f => f.d >= minUm && f.fill > 0.45 && f.aspect < 3);
-        const il = label(inclMask, w, h);
-        incls = extract(il.labels, il.count, w, h, umPerPx)
-          .filter(f => f.d >= minUm * 1.2 && f.fill > 0.3 && f.aspect < 4);
-        porosityPct = 100 * pores.reduce((s, p) => s + p.area, 0) / (w * h);
+        const res = compute(current);
+        pores = res.pores; incls = res.incls; porosityPct = res.porosityPct;
         drawOverlay();
-        updateStats(w, h);
+        updateStats(res.w, res.h);
         drawPoreMap();
         setStatus('วิเคราะห์เสร็จ · ' + pores.length + ' รูพรุน · ' + incls.length + ' อนุภาค');
+        saveSession();
       } catch (e) {
         setStatus('วิเคราะห์ไม่สำเร็จ: ' + e.message);
       }
@@ -255,6 +272,14 @@
     });
     $('empty').style.display = 'none';
     $('detBadge').textContent = (pores.length + incls.length) + ' รายการ';
+    if (calPts.length) {
+      const green = css('--green') || '#3fb950';
+      octx.strokeStyle = green; octx.lineWidth = Math.max(2, w / 400);
+      if (calPts.length === 2) {
+        octx.beginPath(); octx.moveTo(calPts[0].x, calPts[0].y); octx.lineTo(calPts[1].x, calPts[1].y); octx.stroke();
+      }
+      calPts.forEach(p => { octx.beginPath(); octx.arc(p.x, p.y, Math.max(4, w / 150), 0, Math.PI * 2); octx.fillStyle = green; octx.fill(); });
+    }
   }
 
   function updateStats(w, h) {
@@ -547,6 +572,223 @@
     $('exportStatus').textContent = 'ส่งออก CSV แล้ว';
   }
 
+  /* ---------------- persistence / import / export ---------------- */
+  function sessionSnapshot() {
+    return {
+      app: 'AluSight v2',
+      savedAt: new Date().toISOString(),
+      general: {
+        batch: $('gBatch').value, grade: $('gGrade').value,
+        lengthMm: $('gLen').value, widthMm: $('gWid').value,
+        thicknessMm: $('gThk').value, process: $('gProc').value
+      },
+      params: { percentile: $('pct').value, minPoreUm: $('minArea').value, scaleUmPer100Px: $('scale').value },
+      zones: zones, rca: rca, batch: batchResults
+    };
+  }
+
+  function applySession(d) {
+    if (!d || typeof d !== 'object') throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
+    const g = d.general || {};
+    const set = (id, v) => { if (v !== undefined && $(id)) $(id).value = v; };
+    set('gBatch', g.batch); set('gGrade', g.grade); set('gLen', g.lengthMm);
+    set('gWid', g.widthMm); set('gThk', g.thicknessMm); set('gProc', g.process);
+    const p = d.params || {};
+    set('pct', p.percentile); set('minArea', p.minPoreUm); set('scale', p.scaleUmPer100Px);
+    zones = Array.isArray(d.zones) ? d.zones : [];
+    rca = Array.isArray(d.rca) ? d.rca : [];
+    batchResults = Array.isArray(d.batch) ? d.batch : [];
+    zoneSeq = zones.reduce((m, z) => Math.max(m, parseInt(z.id, 10) || 0), 0);
+    sync(); renderZones(); renderRca(); renderChart(); renderFea(); renderBatch();
+  }
+
+  function saveSession() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(sessionSnapshot()));
+      $('saveStatus').textContent = 'บันทึกอัตโนมัติ: ' + new Date().toLocaleTimeString('th-TH');
+    } catch (e) {
+      $('saveStatus').textContent = 'บันทึกอัตโนมัติ: ไม่ได้ (' + e.message + ')';
+    }
+  }
+
+  function restoreSession() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) { applySession(JSON.parse(raw)); $('saveStatus').textContent = 'กู้คืน session ล่าสุดแล้ว'; }
+    } catch (e) {
+      $('saveStatus').textContent = 'กู้คืนไม่ได้: ' + e.message;
+    }
+  }
+
+  function resetSession() {
+    if (!window.confirm('ล้างข้อมูลทั่วไป โซนวัด RCA และผลชุดภาพทั้งหมด?')) return;
+    localStorage.removeItem(SAVE_KEY);
+    zones = []; rca = []; batchResults = []; zoneSeq = 0;
+    ['gBatch', 'gGrade', 'gLen', 'gWid', 'gThk', 'gProc'].forEach(id => { if ($(id)) $(id).value = ''; });
+    renderZones(); renderRca(); renderChart(); renderFea(); renderBatch();
+    $('saveStatus').textContent = 'ล้างข้อมูลแล้ว';
+  }
+
+  function importSession(file) {
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        applySession(JSON.parse(ev.target.result));
+        saveSession();
+        $('exportStatus').textContent = 'นำเข้า session แล้ว';
+      } catch (e) {
+        $('exportStatus').textContent = 'นำเข้าไม่สำเร็จ: ' + e.message;
+      }
+    };
+    r.onerror = () => { $('exportStatus').textContent = 'อ่านไฟล์ไม่สำเร็จ'; };
+    r.readAsText(file);
+  }
+
+  function exportRcaCsv() {
+    const head = 'temp_c,pressure_bar,cool_s,speed_mm_s,label\n';
+    const rows = rca.map(r => [r.temp, r.pressure, r.cool, r.speed, r.label].join(',')).join('\n');
+    download('alusight-rca.csv', head + rows, 'text/csv');
+    $('exportStatus').textContent = 'ส่งออก CSV (RCA) แล้ว';
+  }
+
+  /* ---------------- calibration ---------------- */
+  function setupCalibration() {
+    $('calBtn').addEventListener('click', () => {
+      if (!current) { setStatus('ต้องโหลดภาพก่อน'); return; }
+      calMode = !calMode; calPts = [];
+      document.querySelector('.canvas-wrap').classList.toggle('calibrating', calMode);
+      $('calHint').textContent = calMode
+        ? 'กำลังปรับเทียบ — คลิกจุดแรกของมาตราอ้างอิงบนภาพ'
+        : 'กดปุ่มแล้วคลิกสองจุดบนภาพที่เป็นมาตราอ้างอิง — ระบบจะคำนวณ µm/px ให้';
+      drawOverlay();
+    });
+    $('out').addEventListener('click', e => {
+      if (!calMode || !current) return;
+      const r = $('out').getBoundingClientRect();
+      const x = (e.clientX - r.left) * (current.w / r.width);
+      const y = (e.clientY - r.top) * (current.h / r.height);
+      calPts.push({ x, y });
+      if (calPts.length === 1) {
+        $('calHint').textContent = 'คลิกจุดที่สองของมาตราอ้างอิง';
+      } else {
+        const dist = Math.hypot(calPts[1].x - calPts[0].x, calPts[1].y - calPts[0].y);
+        const known = parseFloat($('calLen').value) || 100;
+        if (dist > 2) {
+          const umPer100 = (known / dist) * 100;
+          $('scale').value = Math.max(10, Math.min(100, umPer100));
+          sync();
+          $('calHint').textContent = 'ปรับเทียบแล้ว: ' + umPer100.toFixed(2) + ' µm/100px จากระยะ ' +
+            dist.toFixed(1) + ' px ที่กำหนดเป็น ' + known + ' µm';
+          setStatus('ปรับเทียบสเกลจากภาพแล้ว');
+          saveSession();
+        } else {
+          $('calHint').textContent = 'ระยะสั้นเกินไป — กดปุ่มแล้วลองใหม่';
+          calPts = [];
+        }
+        calMode = false;
+        document.querySelector('.canvas-wrap').classList.remove('calibrating');
+        drawOverlay();
+      }
+    });
+  }
+
+  /* ---------------- batch ---------------- */
+  function renderBatch() {
+    const box = $('batchResult');
+    if (!batchResults.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="card"><h4>ผลวิเคราะห์ชุดภาพ <span class="tag-sm">' +
+      batchResults.length + ' ภาพ</span></h4><div class="table-scroll"><table class="data">' +
+      '<thead><tr><th>ไฟล์</th><th>รูพรุน</th><th>อนุภาค</th><th>% porosity</th><th>สถานะ</th></tr></thead><tbody>' +
+      batchResults.map(r => '<tr><td>' + (r.name || '—') + '</td><td>' + (r.pores === undefined ? '—' : r.pores) +
+        '</td><td>' + (r.incls === undefined ? '—' : r.incls) + '</td><td>' +
+        (r.porosityPct === undefined ? '—' : Number(r.porosityPct).toFixed(2) + '%') + '</td><td>' +
+        (r.error ? '<span class="defect-text">' + r.error + '</span>' : '<span class="normal-text">สำเร็จ</span>') +
+        '</td></tr>').join('') + '</tbody></table></div></div>';
+  }
+
+  async function runBatch(files) {
+    if (!files.length) return;
+    batchResults = [];
+    $('batchInfo').textContent = 'กำลังวิเคราะห์ ' + files.length + ' ภาพ…';
+    for (const f of files) {
+      try {
+        const src = await new Promise((res, rej) => {
+          const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f);
+        });
+        const img = await loadImage(src);
+        const rr = rasterize(img);
+        const res = compute(rr);
+        batchResults.push({
+          name: f.name, pores: res.pores.length, incls: res.incls.length,
+          porosityPct: +res.porosityPct.toFixed(3), w: res.w, h: res.h
+        });
+      } catch (e) {
+        batchResults.push({ name: f.name, error: e.message });
+      }
+    }
+    renderBatch();
+    $('batchInfo').textContent = 'วิเคราะห์ชุดเสร็จ (' + batchResults.length + ' ภาพ)';
+    setStatus('วิเคราะห์ชุดภาพเสร็จแล้ว');
+    saveSession();
+  }
+
+  /* ---------------- ECA over WebSerial ---------------- */
+  function parseSerialLine(line) {
+    const s = String(line).trim();
+    let m = s.match(/V\s*[:=]?\s*([0-9.]+)[\s,;]+I\s*[:=]?\s*([0-9.]+)/i);
+    if (m) return { v: parseFloat(m[1]), i: parseFloat(m[2]) };
+    m = s.match(/^([0-9.]+)[\s,;]+([0-9.]+)$/);
+    if (m) return { v: parseFloat(m[1]), i: parseFloat(m[2]) };
+    return null;
+  }
+
+  async function toggleSerial() {
+    if (serialReading && serialReader) {
+      serialReading = false;
+      try { await serialReader.cancel(); } catch (e) { /* ignore */ }
+      if (serialPort) { try { await serialPort.close(); } catch (e) { /* ignore */ } }
+      serialReader = null; serialPort = null;
+      $('serialBtn').textContent = 'เชื่อมเครื่อง ECA';
+      $('serialStatus').textContent = 'หยุดอ่านข้อมูลแล้ว';
+      return;
+    }
+    if (!('serial' in navigator)) {
+      $('serialStatus').textContent = 'เบราว์เซอร์นี้ไม่รองรับ WebSerial — ใช้ Chrome หรือ Edge';
+      return;
+    }
+    try {
+      serialPort = await navigator.serial.requestPort();
+      await serialPort.open({ baudRate: 9600 });
+      serialReading = true;
+      $('serialBtn').textContent = 'หยุดอ่านเครื่อง';
+      $('serialStatus').textContent = 'เชื่อมต่อแล้ว — รอข้อมูล V/I';
+      serialReader = serialPort.readable.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (serialReading) {
+        const got = await serialReader.read();
+        if (got.done) break;
+        buf += decoder.decode(got.value, { stream: true });
+        const lines = buf.split(/\r?\n/);
+        buf = lines.pop();
+        lines.forEach(line => {
+          const p = parseSerialLine(line);
+          if (!p || !isFinite(p.v) || !isFinite(p.i) || p.i === 0) return;
+          if (!zones.length) addZone();
+          zones[0].v = p.v.toFixed(3);
+          zones[0].i = p.i.toFixed(4);
+          renderZones(); renderChart(); renderFea();
+          $('serialStatus').textContent = 'V=' + p.v + ' I=' + p.i + ' R=' + (p.v / p.i).toFixed(3) + ' Ω';
+          saveSession();
+        });
+      }
+    } catch (e) {
+      serialReading = false;
+      $('serialStatus').textContent = 'เชื่อมต่อไม่ได้: ' + e.message;
+      $('serialBtn').textContent = 'เชื่อมเครื่อง ECA';
+    }
+  }
+
   /* ---------------- wiring ---------------- */
   function setStatus(t) { $('status').textContent = t; }
 
@@ -594,14 +836,28 @@
   document.querySelectorAll('.sample').forEach(b => b.addEventListener('click', () => setImage(SAMPLES[b.dataset.key])));
 
   $('run').addEventListener('click', analyze);
-  $('addZone').addEventListener('click', () => addZone());
-  $('autoZone').addEventListener('click', autoZones);
+  $('addZone').addEventListener('click', () => { addZone(); saveSession(); });
+  $('autoZone').addEventListener('click', () => { autoZones(); saveSession(); });
+  $('serialBtn').addEventListener('click', toggleSerial);
+  $('calBtn') && setupCalibration();
+  $('batchBtn').addEventListener('click', () => $('batchFiles').click());
+  $('batchFiles').addEventListener('change', e => {
+    runBatch(Array.from(e.target.files || []));
+  });
   $('addRca').addEventListener('click', () => {
     rca.push({ temp: '700', pressure: '80', cool: '12', speed: '45', label: 'good' });
-    renderRca();
+    renderRca(); saveSession();
   });
   $('exportJson').addEventListener('click', exportJson);
   $('exportCsv').addEventListener('click', exportCsv);
+  $('exportRcaCsv').addEventListener('click', exportRcaCsv);
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (f) importSession(f);
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+  $('resetBtn').addEventListener('click', resetSession);
 
   const theme = $('themeToggle');
   theme.addEventListener('click', () => {
@@ -610,6 +866,7 @@
     $('themeLabel').textContent = dark ? 'โหมดมืด' : 'โหมดสว่าง';
     renderChart(); renderFea();
     if (pores.length) { drawOverlay(); drawPoreMap(); }
+    saveSession();
   });
 
   const sync = () => {
@@ -618,7 +875,14 @@
     $('scaleVal').textContent = $('scale').value + ' µm/100px';
   };
   ['pct', 'minArea', 'scale'].forEach(id => $(id).addEventListener('input', sync));
+  ['pct', 'minArea', 'scale'].forEach(id => $(id).addEventListener('change', saveSession));
+  ['gBatch', 'gGrade', 'gLen', 'gWid', 'gThk', 'gProc'].forEach(id => $(id).addEventListener('change', saveSession));
   sync();
 
-  renderZones(); renderRca(); renderChart(); renderFea();
+  renderZones(); renderRca(); renderChart(); renderFea(); renderBatch();
+  restoreSession();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
 })();
