@@ -3,256 +3,266 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AluSight v2 — ตรวจจับข้อบกพร่องอะลูมิเนียม</title>
-<meta name="description" content="AluSight v2 — วิเคราะห์ภาพจุลทรรศน์ ตรวจจับรูพรุน วัดสัญญาณ ECA หลายตำแหน่ง กราฟความสัมพันธ์ และ Root Cause Analysis">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%232f81f7'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+<title>AluSight — เครื่องมือตรวจจับข้อบกพร่องอะลูมิเนียม</title>
+<meta name="description" content="AluSight — คอนโซลตรวจจับรูพรุน วิเคราะห์สัญญาณ ECA หลายตำแหน่ง กราฟความสัมพันธ์ และ Root Cause Analysis">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23126287'/><circle cx='50' cy='50' r='22' fill='white'/><circle cx='50' cy='50' r='9' fill='%23126287'/></svg>">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skip" href="#main">ข้ามไปยังพื้นที่ทำงาน</a>
 
-<a class="skip" href="#main">ข้ามไปยังเนื้อหาหลัก</a>
-
-<nav class="nav" aria-label="หลัก">
-  <div class="nav-in">
-    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>AluSight<span class="ver">v2</span></a>
-    <div class="nav-links">
-      <a href="#workbench" class="active">工作台</a>
-      <a href="#zones">พื้นที่วัด</a>
-      <a href="#chart">กราฟความสัมพันธ์</a>
-      <a href="#fea">แผนที่ FEA</a>
-      <a href="#rca">RCA</a>
-      <a href="dashboard.html">Dashboard</a>
-    </div>
-    <div class="spacer"></div>
-    <button id="themeToggle" class="theme-btn" type="button" role="switch" aria-checked="true" aria-label="สลับโหมดมืด">
-      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9c0-.5-.04-1-.12-1.47A7 7 0 0 1 12.47 3.12C12.3 3.04 12.15 3 12 3Z"/></svg>
-      <span id="themeLabel">โหมดมืด</span>
-    </button>
+<header class="appbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 2 2 7v10l10 5 10-5V7L12 2Zm0 2.3 7.5 3.75L12 11.8 4.5 8.05 12 4.3ZM4 9.6l7 3.5v7.3l-7-3.5V9.6Zm9 10.8v-7.3l7-3.5v7.3l-7 3.5Z"/></svg>
+    <div><b>AluSight</b><small>Defect Inspection Console</small></div>
   </div>
-</nav>
-
-<header class="hero" id="top">
-  <div class="wrap">
-    <span class="eyebrow">AI + Optical Microscope + Eddy Current Array</span>
-    <h1>AluSight v2</h1>
-    <p class="tag">ตรวจจับรูพรุน วิเคราะห์สัญญาณไฟฟ้า หาสาเหตุ — ในหน้าเดียว</p>
-    <div class="hero-meta">
-      <span class="pill"><span class="pdot ok" aria-hidden="true"></span>พร้อมใช้งาน</span>
-      <span class="pill">กำหนดส่ง: วันจันทร์</span>
-      <span class="pill">7 แหล่งข้อมูลอ้างอิง</span>
-    </div>
+  <div class="appbar-meta">
+    <span class="pill"><i class="pdot ok" aria-hidden="true"></i>พร้อมใช้งาน</span>
+    <span class="pill deadline">กำหนดส่ง: วันจันทร์</span>
+  </div>
+  <div class="appbar-actions">
+    <button class="tbtn" id="importBtn" type="button" title="นำเข้า session">นำเข้า</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+    <button class="tbtn" id="exportJson" type="button" title="ส่งออก JSON">ส่งออก</button>
+    <button class="tbtn" id="printBtn" type="button" title="พิมพ์รายงาน">พิมพ์</button>
+    <button class="tbtn" id="resetBtn" type="button" title="ล้างข้อมูล">ล้าง</button>
+    <button class="tbtn theme" id="themeToggle" type="button" role="switch" aria-checked="true" aria-label="สลับโหมดมืด">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9c0-.5-.04-1-.12-1.47A7 7 0 0 1 12.47 3.12C12.3 3.04 12.15 3 12 3Z"/></svg>
+      <span id="themeLabel">มืด</span>
+    </button>
   </div>
 </header>
 
-<main id="main">
-<section id="workbench" aria-labelledby="wb-h">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-kicker">ขั้นตอนที่ 1–2</div>
-      <h2 class="sec-title" id="wb-h">ข้อมูลชิ้นงาน และภาพ OM</h2>
-      <p class="sec-lead">กรอกข้อมูลทั่วไปครั้งเดียว อัปโหลดภาพจุลทรรศน์ แล้วกดวิเคราะห์เพื่อให้ระบบตรวจจับตำแหน่งรูพรุนโดยอัตโนมัติ</p>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-label">WORKSPACE</div>
+    <nav class="navlist" aria-label="ส่วนของเครื่องมือ">
+      <button class="navitem active" type="button" data-view="analyze" aria-current="page">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3V5Zm2 2v10h14V7H5Zm2 2h6v6H7V9Zm8 0h2v2h-2V9Zm0 4h2v2h-2v-2Z"/></svg>
+        <span>วิเคราะห์ภาพ</span><kbd>1</kbd>
+      </button>
+      <button class="navitem" type="button" data-view="zones">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Zm2 2v3h3v-3h-3Z"/></svg>
+        <span>พื้นที่วัด ECA</span><kbd>2</kbd>
+      </button>
+      <button class="navitem" type="button" data-view="chart">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 3h2v16h16v2H3V3Zm4 11 4-5 3 3 5-7 2 1.4-6.1 8.6-3-3-3.1 3.9L7 14Z"/></svg>
+        <span>กราฟความสัมพันธ์</span><kbd>3</kbd>
+      </button>
+      <button class="navitem" type="button" data-view="fea">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 3h8v8H3V3Zm10 0h8v8h-8V3ZM3 13h8v8H3v-8Zm10 0h8v8h-8v-8Z"/></svg>
+        <span>แผนที่ FEA</span><kbd>4</kbd>
+      </button>
+      <button class="navitem" type="button" data-view="rca">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M5 3h14v18H5V3Zm2 2v3h10V5H7Zm0 5v2h10v-2H7Zm0 4v2h10v-2H7Zm0 4v2h6v-2H7Z"/></svg>
+        <span>RCA</span><kbd>5</kbd>
+      </button>
+      <button class="navitem" type="button" data-view="refs">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 3h16v18H4V3Zm2 2v14h12V5H6Zm2 2h8v2H8V7Zm0 4h8v2H8v-2Zm0 4h5v2H8v-2Z"/></svg>
+        <span>แหล่งข้อมูล</span><kbd>6</kbd>
+      </button>
+    </nav>
+
+    <div class="side-label mt">SESSION</div>
+    <div class="side-card">
+      <div class="kv"><span>Batch</span><b id="sideBatch">—</b></div>
+      <div class="kv"><span>เกรด</span><b id="sideGrade">—</b></div>
+      <div class="kv"><span>โซนวัด</span><b id="sideZones">0</b></div>
+      <div class="kv"><span>RCA</span><b id="sideRca">0</b></div>
     </div>
-    <div class="card session-bar">
-      <span class="muted" id="saveStatus">บันทึกอัตโนมัติ: พร้อม</span>
-      <span class="spacer"></span>
-      <button class="btn btn-ghost" id="importBtn" type="button">นำเข้า JSON</button>
-      <input type="file" id="importFile" accept="application/json" style="display:none">
-      <button class="btn btn-ghost" id="printBtn" type="button">พิมพ์รายงาน</button>
-      <button class="btn btn-ghost" id="resetBtn" type="button">ล้างข้อมูล</button>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <h3>ข้อมูลทั่วไป <span class="tag-sm">กรอกครั้งเดียว</span></h3>
-        <div class="form-grid">
-          <label class="field"><span>รหัสชิ้นงาน / Batch</span><input id="gBatch" type="text" value="BP18-AL-001" autocomplete="off"></label>
-          <label class="field"><span>เกรดวัสดุ</span><input id="gGrade" type="text" value="ADC12" autocomplete="off"></label>
-          <label class="field"><span>ความยาว (mm)</span><input id="gLen" type="number" min="1" step="1" value="150"></label>
-          <label class="field"><span>ความกว้าง (mm)</span><input id="gWid" type="number" min="1" step="1" value="100"></label>
-          <label class="field"><span>ความหนา (mm)</span><input id="gThk" type="number" min="1" step="0.1" value="6"></label>
-          <label class="field"><span>Process</span><input id="gProc" type="text" value="Die Casting" autocomplete="off"></label>
+    <p class="side-note">Alt + 1–6 เพื่อสลับส่วน<br>ข้อมูลอยู่ในเครื่องเท่านั้น</p>
+  </aside>
+
+  <main id="main" class="workspace">
+    <h1 class="sr-only">AluSight — เครื่องมือตรวจจับข้อบกพร่องอะลูมิเนียม</h1>
+
+    <!-- ============ ANALYZE ============ -->
+    <section class="view active" id="view-analyze" aria-labelledby="h-analyze">
+      <div class="view-head">
+        <div><h2 id="h-analyze">วิเคราะห์ภาพ</h2><p>อัปโหลดภาพ OM → ปรับเทียบสเกล → ตรวจจับรูพรุน</p></div>
+        <span class="badge" id="detBadge">—</span>
+      </div>
+
+      <div class="work-grid">
+        <!-- controls -->
+        <div class="col">
+          <div class="panel">
+            <div class="panel-h"><h3>1 · ข้อมูลชิ้นงาน</h3></div>
+            <div class="panel-b form-grid-one">
+              <label class="field"><span>รหัส Batch</span><input id="gBatch" type="text" value="BP18-AL-001" autocomplete="off"></label>
+              <label class="field"><span>เกรดวัสดุ</span><input id="gGrade" type="text" value="ADC12" autocomplete="off"></label>
+              <label class="field"><span>ความยาว (mm)</span><input id="gLen" type="number" min="1" step="1" value="150"></label>
+              <label class="field"><span>ความกว้าง (mm)</span><input id="gWid" type="number" min="1" step="1" value="100"></label>
+              <label class="field"><span>ความหนา (mm)</span><input id="gThk" type="number" min="1" step="0.1" value="6"></label>
+              <label class="field"><span>Process</span><input id="gProc" type="text" value="Die Casting" autocomplete="off"></label>
+            </div>
+          </div>
+
+          <div class="panel mt">
+            <div class="panel-h"><h3>2 · ภาพ OM</h3></div>
+            <div class="panel-b">
+              <div id="drop" class="drop" role="button" tabindex="0" aria-label="เลือกหรือวางภาพจุลทรรศน์">
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V5h14v14ZM7 15l3.5-4.5 2.5 3 3-4 4 5.5H7Z"/></svg>
+                <div class="drop-t">วางภาพหรือคลิกเพื่อเลือก</div>
+                <div class="drop-s">JPG · PNG · BMP · TIFF</div>
+                <input type="file" id="file" accept="image/*" style="display:none">
+              </div>
+              <div class="samples">
+                <button class="sample" type="button" data-key="om_raw">ภาพดิบ</button>
+                <button class="sample" type="button" data-key="om_overlay">ผลวิเคราะห์</button>
+              </div>
+              <label class="field"><span>ความยาวมาตราอ้างอิง (µm)</span><input id="calLen" type="number" min="1" step="1" value="100"></label>
+              <button class="tbtn wide" id="calBtn" type="button">ปรับเทียบสเกลจากภาพ</button>
+              <p class="hint" id="calHint">คลิก 2 จุดบนมาตราอ้างอิงเพื่อคำนวณ µm/px</p>
+            </div>
+          </div>
+
+          <div class="panel mt">
+            <div class="panel-h"><h3>3 · พารามิเตอร์</h3></div>
+            <div class="panel-b">
+              <label class="field"><span>Threshold percentile</span><input type="range" id="pct" min="1" max="10" step="0.5" value="3"><output id="pctVal">3.0%</output></label>
+              <label class="field"><span>รูพรุนขั้นต่ำ (µm)</span><input type="range" id="minArea" min="0" max="20" step="1" value="4"><output id="minAreaVal">4 µm</output></label>
+              <label class="field"><span>สเกล (µm / 100 px)</span><input type="range" id="scale" min="10" max="100" step="5" value="25"><output id="scaleVal">25 µm/100px</output></label>
+              <button class="pbtn" id="run" type="button">วิเคราะห์ภาพ</button>
+              <button class="tbtn wide mt" id="batchBtn" type="button">วิเคราะห์หลายภาพ</button>
+              <input type="file" id="batchFiles" accept="image/*" multiple style="display:none">
+              <p class="hint" id="batchInfo">เลือกหลายไฟล์เพื่อวิเคราะห์เป็นชุด</p>
+              <div id="batchResult"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- canvas -->
+        <div class="col center">
+          <div class="panel grow">
+            <div class="panel-h"><h3>ภาพผลการตรวจจับ</h3><span class="mono muted" id="imgDim"></span></div>
+            <div class="canvas-wrap">
+              <canvas id="out" aria-label="ภาพผลการตรวจจับ"></canvas>
+              <div id="empty" class="empty">ยังไม่มีภาพ — เลือกตัวอย่างหรืออัปโหลด</div>
+            </div>
+            <div class="legend"><span><i class="swatch pore" aria-hidden="true"></i>รูพรุน</span><span><i class="swatch incl" aria-hidden="true"></i>อนุภาค</span><span><i class="swatch cal" aria-hidden="true"></i>จุดปรับเทียบ</span></div>
+          </div>
+        </div>
+
+        <!-- results -->
+        <div class="col">
+          <div class="kpis">
+            <div class="kpi"><span class="n" id="sPores">–</span><span class="l">รูพรุน</span></div>
+            <div class="kpi"><span class="n" id="sIncl">–</span><span class="l">อนุภาค</span></div>
+            <div class="kpi"><span class="n" id="sPct">–</span><span class="l">% porosity</span></div>
+            <div class="kpi"><span class="n" id="sMax">–</span><span class="l">Ø สูงสุด (µm)</span></div>
+          </div>
+          <div class="panel mt">
+            <div class="panel-h"><h3>รายการตรวจพบ</h3><span class="mono muted">TOP 12</span></div>
+            <div class="panel-b muted" id="detList">ยังไม่มีข้อมูล</div>
+          </div>
+          <div class="panel mt">
+            <div class="panel-h"><h3>Pore Map</h3><span class="mono muted">X / Y</span></div>
+            <div class="panel-b"><svg id="poreMap" viewBox="0 0 800 400" role="img" aria-label="แผนที่กระจายรูพรุน"></svg></div>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <h3>ภาพจุลทรรศน์ (OM)</h3>
-        <div id="drop" class="drop" role="button" tabindex="0" aria-label="เลือกหรือวางภาพจุลทรรศน์">
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V5h14v14ZM7 15l3.5-4.5 2.5 3 3-4 4 5.5H7Z"/></svg>
-          <div class="drop-t">วางภาพที่นี่ หรือคลิกเพื่อเลือก</div>
-          <div class="drop-s">JPG / PNG / BMP / TIFF · ประมวลผลในเบราว์เซอร์</div>
-          <input type="file" id="file" accept="image/*" style="display:none">
-        </div>
-        <div class="samples">
-          <button class="sample" type="button" data-key="om_raw">ตัวอย่างภาพดิบ</button>
-          <button class="sample" type="button" data-key="om_overlay">ตัวอย่างผลวิเคราะห์</button>
-        </div>
-        <div class="cal-row">
-          <label class="field"><span>วัดความยาวจริงที่รู้ (µm)</span><input id="calLen" type="number" min="1" step="1" value="100"></label>
-          <button class="btn btn-ghost" id="calBtn" type="button">ปรับเทียบสเกลจากภาพ</button>
-        </div>
-        <p class="note" id="calHint">กดปุ่มแล้วคลิกสองจุดบนภาพที่เป็นมาตราอ้างอิง — ระบบจะคำนวณ µm/px ให้</p>
-        <div class="params">
-          <label class="field"><span>Threshold percentile</span><input type="range" id="pct" min="1" max="10" step="0.5" value="3"><output id="pctVal">3.0%</output></label>
-          <label class="field"><span>ขนาดรูพรุนขั้นต่ำ (µm)</span><input type="range" id="minArea" min="0" max="20" step="1" value="4"><output id="minAreaVal">4 µm</output></label>
-          <label class="field"><span>สเกล (µm / 100 px)</span><input type="range" id="scale" min="10" max="100" step="5" value="25"><output id="scaleVal">25 µm/100px</output></label>
-        </div>
-        <button class="btn btn-primary" id="run" type="button">วิเคราะห์ภาพ</button>
-        <div class="batch-row">
-          <button class="btn btn-ghost" id="batchBtn" type="button">วิเคราะห์หลายภาพ</button>
-          <input type="file" id="batchFiles" accept="image/*" multiple style="display:none">
-          <span class="muted" id="batchInfo">เลือกหลายไฟล์เพื่อวิเคราะห์เป็นชุด</span>
-        </div>
-        <div id="batchResult" class="mt-4"></div>
-        <p class="status" id="status" role="status" aria-live="polite">ยังไม่มีภาพ — เลือกตัวอย่างหรืออัปโหลด</p>
+    </section>
+
+    <!-- ============ ZONES ============ -->
+    <section class="view" id="view-zones" aria-labelledby="h-zones" hidden>
+      <div class="view-head">
+        <div><h2 id="h-zones">พื้นที่วัด ECA</h2><p>Voltage / Current ต่อบริเวณ · ความต้านทาน R = V / I · เปรียบเทียบจุดปกติและดีเฟค</p></div>
+        <span class="badge" id="zoneCount">0 บริเวณ</span>
       </div>
-    </div>
-    <div class="panel mt-4">
-      <div class="panel-h"><h3>ผลการตรวจจับ</h3><span class="badge" id="detBadge">—</span></div>
-      <div class="analysis-grid">
-        <div class="canvas-wrap">
-          <canvas id="out" aria-label="ภาพผลการตรวจจับ"></canvas>
-          <div id="empty" class="empty">อัปโหลดภาพเพื่อเริ่มวิเคราะห์</div>
+      <div class="panel">
+        <div class="panel-h tools">
+          <button class="tbtn" id="addZone" type="button">+ เพิ่มบริเวณ</button>
+          <button class="tbtn" id="autoZone" type="button">เติมจากผลตรวจจับ</button>
+          <button class="tbtn" id="serialBtn" type="button">เชื่อมเครื่อง ECA</button>
+          <span class="spacer"></span>
+          <span class="mono muted" id="serialStatus">ยังไม่เชื่อมต่อ</span>
         </div>
+        <div class="panel-b">
+          <div class="table-scroll">
+            <table class="data" id="zoneTable">
+              <thead><tr><th>บริเวณ</th><th>Voltage (V)</th><th>Current (A)</th><th>R (Ω)</th><th>สภาพ</th><th>% porosity</th><th></th></tr></thead>
+              <tbody id="zoneBody"><tr><td colspan="7" class="muted">ยังไม่มีบริเวณ — กด "+ เพิ่มบริเวณ"</td></tr></tbody>
+            </table>
+          </div>
+          <p class="hint">รองรับข้อมูลจากเครื่องจริงผ่าน WebSerial ที่ 9600 baud (Chrome / Edge) รูปแบบบรรทัด V:5.12,I:0.43 หรือ 5.12,0.43</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHART ============ -->
+    <section class="view" id="view-chart" aria-labelledby="h-chart" hidden>
+      <div class="view-head">
+        <div><h2 id="h-chart">กราฟความสัมพันธ์</h2><p>% porosity เทียบกับความต้านทานไฟฟ้า · regression และ correlation</p></div>
+        <span class="badge mono" id="corrVal">r = —</span>
+      </div>
+      <div class="panel">
+        <div class="panel-b"><svg id="resChart" viewBox="0 0 800 420" role="img" aria-label="กราฟความสัมพันธ์ระหว่างเปอร์เซ็นต์รูพรุนและความต้านทาน"></svg></div>
+        <div class="panel-h legend"><span><i class="swatch defect" aria-hidden="true"></i>ดีเฟค</span><span><i class="swatch normal" aria-hidden="true"></i>ปกติ</span><span><i class="swatch trend" aria-hidden="true"></i>แนวโน้ม</span></div>
+      </div>
+    </section>
+
+    <!-- ============ FEA ============ -->
+    <section class="view" id="view-fea" aria-labelledby="h-fea" hidden>
+      <div class="view-head"><div><h2 id="h-fea">แผนที่ความเสียหายแบบ FEA</h2><p>ความหนาแน่นข้อบกพร่องบนพื้นผิวชิ้นงาน และคะแนนความเสี่ยง</p></div></div>
+      <div class="work-grid two">
+        <div class="panel"><div class="panel-h"><h3>Heatmap</h3><span class="mono muted">10 × 6</span></div><div class="panel-b"><svg id="feaMap" viewBox="0 0 640 360" role="img" aria-label="แผนที่ความเสียหายแบบ FEA"></svg><div class="scale-bar"><span>ต่ำ</span><span class="gradient" aria-hidden="true"></span><span>สูง</span></div></div></div>
         <div>
-          <div class="stat-grid">
-            <div class="stat"><div class="n" id="sPores">–</div><div class="l">รูพรุน</div></div>
-            <div class="stat"><div class="n" id="sIncl">–</div><div class="l">อนุภาค</div></div>
-            <div class="stat"><div class="n" id="sPct">–</div><div class="l">% porosity</div></div>
-            <div class="stat"><div class="n" id="sMax">–</div><div class="l">รูใหญ่สุด (µm)</div></div>
-          </div>
-          <div class="card mt-4">
-            <h4>ตำแหน่งที่ตรวจพบ <span class="tag-sm">เรียงตามขนาด</span></h4>
-            <div id="detList" class="muted">ยังไม่มีข้อมูล — วิเคราะห์ภาพก่อน</div>
+          <div class="kpis one"><div class="kpi"><span class="n" id="riskScore">—</span><span class="l">Risk Score (0–100)</span></div></div>
+          <div class="panel mt"><div class="panel-h"><h3>สรุป</h3></div><div class="panel-b"><p id="riskText" class="muted">เพิ่มบริเวณวัดเพื่อดูผลประเมิน</p><h4>บริเวณเสี่ยงสูงสุด</h4><div id="hotspot" class="mono muted">—</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RCA ============ -->
+    <section class="view" id="view-rca" aria-labelledby="h-rca" hidden>
+      <div class="view-head">
+        <div><h2 id="h-rca">Root Cause Analysis</h2><p>พารามิเตอร์สายการผลิต พร้อม Label ชิ้นงานดี / เสีย</p></div>
+        <span class="badge" id="rcaCount">0 record</span>
+      </div>
+      <div class="panel">
+        <div class="panel-h tools">
+          <button class="tbtn" id="addRca" type="button">+ เพิ่ม record</button>
+          <button class="tbtn" id="exportCsv" type="button">CSV โซนวัด</button>
+          <button class="tbtn" id="exportRcaCsv" type="button">CSV RCA</button>
+          <span class="spacer"></span><span class="mono muted" id="exportStatus"></span>
+        </div>
+        <div class="panel-b">
+          <div class="table-scroll">
+            <table class="data" id="rcaTable">
+              <thead><tr><th>#</th><th>อุณหภูมิ (°C)</th><th>แรงดัน (bar)</th><th>Cooling (s)</th><th>ความเร็วฉีด (mm/s)</th><th>Label</th><th></th></tr></thead>
+              <tbody id="rcaBody"><tr><td colspan="7" class="muted">ยังไม่มี record — กด "+ เพิ่ม record"</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
-    </div>
-    <div class="card mt-4">
-      <h3>Pore Map — การกระจายบนชิ้นงาน</h3>
-      <svg id="poreMap" viewBox="0 0 800 400" role="img" aria-label="แผนที่กระจายรูพรุน"></svg>
-    </div>
-  </div>
-</section>
+    </section>
 
-<section id="zones" aria-labelledby="z-h">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-kicker">ขั้นตอนที่ 3</div>
-      <h2 class="sec-title" id="z-h">พื้นที่วัดสัญญาณ ECA</h2>
-      <p class="sec-lead">กรอก Voltage และ Current ของแต่ละบริเวณ ระบบจะคำนวณความต้านทาน (R = V/I) และเปรียบเทียบจุดปกติกับจุดที่เกิดดีเฟค — กดเพิ่มบริเวณได้ตามต้องการ</p>
-    </div>
-    <div class="card">
-      <div class="toolbar">
-        <button class="btn btn-ghost" id="addZone" type="button">+ เพิ่มบริเวณ</button>
-        <button class="btn btn-ghost" id="autoZone" type="button">เติมจากผลตรวจจับ</button>
-        <button class="btn btn-ghost" id="serialBtn" type="button">เชื่อมเครื่อง ECA</button>
-        <span class="muted" id="serialStatus">ยังไม่เชื่อมต่อ</span>
-        <span class="spacer"></span>
-        <span class="muted" id="zoneCount">0 บริเวณ</span>
-      </div>
-      <div class="table-scroll">
-        <table class="data" id="zoneTable">
-          <thead><tr><th>บริเวณ</th><th>Voltage (V)</th><th>Current (A)</th><th>R (Ω)</th><th>สภาพ</th><th>% porosity</th><th></th></tr></thead>
-          <tbody id="zoneBody"><tr><td colspan="7" class="muted">ยังไม่มีบริเวณ — กด "เพิ่มบริเวณ"</td></tr></tbody>
-        </table>
-      </div>
-      <p class="note">ความต้านทานคำนวณจาก V/I · % porosity มาจากผลวิเคราะห์ภาพ หรือกรอกเองถ้ายังไม่มีภาพ</p>
-    </div>
-  </div>
-</section>
-
-<section id="chart" aria-labelledby="c-h">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-kicker">ขั้นตอนที่ 4</div>
-      <h2 class="sec-title" id="c-h">กราฟความสัมพันธ์ % รูพรุน ↔ ความต้านทานไฟฟ้า</h2>
-      <p class="sec-lead">แต่ละจุดแทนหนึ่งบริเวณที่วัด — แนวโน้มจะบอกว่าความต้านทานเพิ่มขึ้นเมื่อเนื้อวัสดุมีรูพรุนมากขึ้นหรือไม่</p>
-    </div>
-    <div class="card">
-      <svg id="resChart" viewBox="0 0 800 420" role="img" aria-label="กราฟความสัมพันธ์ระหว่างเปอร์เซ็นต์รูพรุนและความต้านทาน"></svg>
-      <div class="chart-legend">
-        <span><i class="swatch defect" aria-hidden="true"></i>จุดดีเฟค</span>
-        <span><i class="swatch normal" aria-hidden="true"></i>จุดปกติ</span>
-        <span><i class="swatch trend" aria-hidden="true"></i>แนวโน้ม (regression)</span>
-        <span class="spacer"></span>
-        <span class="muted" id="corrVal">r = —</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="fea" aria-labelledby="f-h">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-kicker">ขั้นตอนที่ 5</div>
-      <h2 class="sec-title" id="f-h">แผนที่ความเสียหายแบบ FEA</h2>
-      <p class="sec-lead">มองภาพรวมชิ้นงานเป็นตารางความหนาแน่นของข้อบกพร่อง ช่วยระบุบริเวณที่เสี่ยงก่อนส่งตรวจจริง</p>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <svg id="feaMap" viewBox="0 0 640 360" role="img" aria-label="แผนที่ความเสียหายแบบ FEA"></svg>
-        <div class="scale-bar"><span>ต่ำ</span><span class="gradient" aria-hidden="true"></span><span>สูง</span></div>
-      </div>
-      <div class="card">
-        <h3>สรุปความเสี่ยง</h3>
-        <div class="stat-grid one">
-          <div class="stat"><div class="n" id="riskScore">—</div><div class="l">Risk Score (0–100)</div></div>
-        </div>
-        <p id="riskText" class="muted mt-4">เพิ่มบริเวณวัดเพื่อดูผลประเมิน</p>
-        <h4 class="mt-4">บริเวณเสี่ยงสูงสุด</h4>
-        <div id="hotspot" class="muted">—</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="rca" aria-labelledby="r-h">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="sec-kicker">ขั้นตอนที่ 6</div>
-      <h2 class="sec-title" id="r-h">Root Cause Analysis</h2>
-      <p class="sec-lead">ชุดข้อมูลพารามิเตอร์สายการผลิต พร้อม Label ชิ้นงานดี/เสีย — ใช้หาสาเหตุของรูพรุนและแนวโน้มการปรับปรุงกระบวนการ</p>
-    </div>
-    <div class="card">
-      <div class="toolbar">
-        <button class="btn btn-ghost" id="addRca" type="button">+ เพิ่ม record</button>
-        <span class="spacer"></span>
-        <span class="muted" id="rcaCount">0 record</span>
-      </div>
-      <div class="table-scroll">
-        <table class="data" id="rcaTable">
-          <thead><tr><th>#</th><th>อุณหภูมิ (°C)</th><th>แรงดัน (bar)</th><th>เวลา cooling (s)</th><th>ความเร็วฉีด (mm/s)</th><th>Label</th><th></th></tr></thead>
-          <tbody id="rcaBody"><tr><td colspan="7" class="muted">ยังไม่มี record — กด "เพิ่ม record"</td></tr></tbody>
-        </table>
-      </div>
-      <div class="toolbar mt-4">
-        <button class="btn btn-primary" id="exportJson" type="button">ส่งออก JSON</button>
-        <button class="btn btn-ghost" id="exportCsv" type="button">ส่งออก CSV</button>
-        <button class="btn btn-ghost" id="exportRcaCsv" type="button">ส่งออก CSV (RCA)</button>
-        <span class="spacer"></span>
-        <span class="muted" id="exportStatus"></span>
-      </div>
-    </div>
-    <div class="card mt-4">
-      <h3>แหล่งข้อมูลอ้างอิง <span class="tag-sm">จากแชททีม</span></h3>
-      <ul class="refs">
-        <li><a href="https://www.kaggle.com/datasets" target="_blank" rel="noopener">Kaggle — ชุดข้อมูลภาพริ้วรอย / รอยขูดขีดบนโปรไฟล์อะลูมิเนียม</a> <span class="muted">(ลิงก์ในแชท: kaggle.com/d…)</span></li>
-        <li><a href="https://zenodo.org/records/12568603" target="_blank" rel="noopener">Zenodo 12568603 — ชุดข้อมูลรูพรุนในชิ้นงานอะลูมิเนียม</a></li>
+    <!-- ============ REFS ============ -->
+    <section class="view" id="view-refs" aria-labelledby="h-refs" hidden>
+      <div class="view-head"><div><h2 id="h-refs">แหล่งข้อมูลอ้างอิง</h2><p>ชุดข้อมูล เอกสาร และงานวิจัยที่ทีมใช้กำหนดสเปก</p></div><span class="badge">7 รายการ</span></div>
+      <div class="panel"><div class="panel-b"><ul class="refs">
+        <li><a href="https://www.kaggle.com/datasets" target="_blank" rel="noopener">Kaggle — ภาพริ้วรอย / รอยขูดขีดบนโปรไฟล์อะลูมิเนียม</a><span class="muted"> (ลิงก์ในแชท: kaggle.com/d…)</span></li>
+        <li><a href="https://zenodo.org/records/12568603" target="_blank" rel="noopener">Zenodo 12568603 — ชุดข้อมูลรูพรุนในอะลูมิเนียมหล่อ</a></li>
         <li><a href="https://data.mendeley.com/datasets/9t8pzw2995/1" target="_blank" rel="noopener">Mendeley 9t8pzw2995 — ภาพรูพรุนจากกล้อง OM</a></li>
-        <li><a href="https://www.mdpi.com/journal/materials" target="_blank" rel="noopener">MDPI Materials — การวิเคราะห์ขนาดและรูปร่างรูพรุนด้วยภาพ OM</a></li>
+        <li><a href="https://www.mdpi.com/journal/materials" target="_blank" rel="noopener">MDPI Materials — วิเคราะห์ขนาดและรูปร่างรูพรุนด้วยภาพ OM</a></li>
         <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10004325/" target="_blank" rel="noopener">PMC10004325 — บทความวิเคราะห์ข้อบกพร่องอะลูมิเนียม</a></li>
-        <li><a href="https://methodist.edu.in/web/uploads/files/castingdefects-171116160842.pdf" target="_blank" rel="noopener">Casting Defects — เอกสารประเภทข้อบกพร่องจากการหล่อ</a></li>
-        <li><span class="muted">Materials Defect Analysis — รอยพุพอง (Blister), การแยกชั้น, การกัดกร่อน</span></li>
-      </ul>
-    </div>
-  </div>
-</section>
-</main>
+        <li><a href="https://methodist.edu.in/web/uploads/files/castingdefects-171116160842.pdf" target="_blank" rel="noopener">Casting Defects — ประเภทข้อบกพร่องจากกระบวนการหล่อ</a></li>
+        <li><span class="muted">Materials Defect Analysis — รอยพุพอง, การแยกชั้น, การกัดกร่อน</span></li>
+      </ul></div></div>
+    </section>
+  </main>
+</div>
 
-<footer>
-  <div class="wrap in">
-    <div><b>AluSight v2</b> · ตรวจจับข้อบกพร่องอะลูมิเนียม · Higher Education Innovation Awards 2027</div>
-    <div>วิเคราะห์ในเบราว์เซอร์ · ไม่อัปโหลดข้อมูล</div>
-  </div>
+<footer class="statusbar">
+  <span class="mono" id="status">พร้อมใช้งาน</span>
+  <span class="sep" aria-hidden="true"></span>
+  <span class="mono muted" id="saveStatus">บันทึกอัตโนมัติ: พร้อม</span>
+  <span class="sep" aria-hidden="true"></span>
+  <span class="mono muted" id="serialStatus2">ECA: ไม่ได้เชื่อมต่อ</span>
+  <span class="spacer"></span>
+  <span class="mono muted">AluSight · กำหนดส่ง วันจันทร์</span>
 </footer>
 
 <script src="samples.js"></script>

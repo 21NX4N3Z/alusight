@@ -1,5 +1,5 @@
 /* ============================================================
-   AluSight v2 — client-side analysis + ECA zones + chart + FEA + RCA
+   AluSight — client-side analysis + ECA zones + chart + FEA + RCA
    No server. All data stays in the browser.
    ============================================================ */
 (function () {
@@ -20,7 +20,7 @@
   let serialPort = null;
   let serialReader = null;
   let serialReading = false;
-  const SAVE_KEY = 'alusight-v2-session';
+  const SAVE_KEY = 'alusight-console-session';
 
   const DATASETS = [
     'Kaggle — crack/scratch on aluminum profiles',
@@ -293,8 +293,8 @@
       .concat(incls.map(p => ({ ...p, cls: 'Inclusion', th: 'อนุภาค' })))
       .sort((a, b) => b.area - a.area).slice(0, 12);
     $('detList').innerHTML = all.length
-      ? '<table class="data"><thead><tr><th>ประเภท</th><th>#</th><th>⌀ (µm)</th><th>ตำแหน่ง (x,y)</th><th>พื้นที่</th></tr></thead><tbody>' +
-        all.map(p => '<tr><td class="' + (p.cls === 'Pore' ? 'defect-text' : '') + '">' + p.cls + '</td><td>' + p.id + '</td><td>' + p.d.toFixed(1) + '</td><td>' + p.cx.toFixed(0) + ',' + p.cy.toFixed(0) + '</td><td>' + p.area.toLocaleString() + ' px</td></tr>').join('') +
+      ? '<table class="data"><thead><tr><th>ประเภท</th><th>#</th><th>Ø (µm)</th><th>ตำแหน่ง X,Y</th></tr></thead><tbody>' +
+        all.map(p => '<tr><td class="' + (p.cls === 'Pore' ? 'defect-text' : '') + '">' + p.th + '</td><td>' + p.id + '</td><td>' + p.d.toFixed(1) + '</td><td>' + p.cx.toFixed(0) + ',' + p.cy.toFixed(0) + '</td></tr>').join('') +
         '</tbody></table>'
       : '<span class="muted">ไม่พบรอยบกพร่อง</span>';
   }
@@ -364,6 +364,7 @@
       }).join('');
     }
     $('zoneCount').textContent = zones.length + ' บริเวณ';
+    updateChrome();
     body.querySelectorAll('input,select').forEach(el => {
       el.addEventListener('change', () => {
         const z = zones.find(x => x.id === parseInt(el.dataset.z, 10));
@@ -519,6 +520,7 @@
       ).join('');
     }
     $('rcaCount').textContent = rca.length + ' record';
+    updateChrome();
     body.querySelectorAll('input,select').forEach(el => {
       el.addEventListener('change', () => {
         rca[parseInt(el.dataset.r, 10)][el.dataset.f] = el.value;
@@ -544,7 +546,7 @@
 
   function exportJson() {
     const data = {
-      app: 'AluSight v2',
+      app: 'AluSight',
       exportedAt: new Date().toISOString(),
       general: {
         batch: $('gBatch').value, grade: $('gGrade').value,
@@ -572,10 +574,42 @@
     $('exportStatus').textContent = 'ส่งออก CSV แล้ว';
   }
 
+  /* ---------------- console chrome ---------------- */
+  const VIEW_ORDER = ['analyze', 'zones', 'chart', 'fea', 'rca', 'refs'];
+
+  function updateChrome() {
+    const set = (id, v) => { if ($(id)) $(id).textContent = v; };
+    set('sideBatch', $('gBatch').value || '—');
+    set('sideGrade', $('gGrade').value || '—');
+    set('sideZones', zones.length);
+    set('sideRca', rca.length);
+  }
+
+  function setSerial(text) {
+    if ($('serialStatus')) $('serialStatus').textContent = text;
+    if ($('serialStatus2')) $('serialStatus2').textContent = 'ECA: ' + text;
+  }
+
+  function setView(name) {
+    if (VIEW_ORDER.indexOf(name) < 0) name = 'analyze';
+    document.querySelectorAll('.navitem').forEach(b => {
+      const on = b.dataset.view === name;
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('.view').forEach(v => {
+      const on = v.id === 'view-' + name;
+      v.classList.toggle('active', on);
+      v.hidden = !on;
+    });
+    if (name === 'chart') renderChart();
+    if (name === 'fea') renderFea();
+  }
+
   /* ---------------- persistence / import / export ---------------- */
   function sessionSnapshot() {
     return {
-      app: 'AluSight v2',
+      app: 'AluSight',
       savedAt: new Date().toISOString(),
       general: {
         batch: $('gBatch').value, grade: $('gGrade').value,
@@ -606,6 +640,7 @@
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(sessionSnapshot()));
       $('saveStatus').textContent = 'บันทึกอัตโนมัติ: ' + new Date().toLocaleTimeString('th-TH');
+      updateChrome();
     } catch (e) {
       $('saveStatus').textContent = 'บันทึกอัตโนมัติ: ไม่ได้ (' + e.message + ')';
     }
@@ -665,8 +700,11 @@
     $('out').addEventListener('click', e => {
       if (!calMode || !current) return;
       const r = $('out').getBoundingClientRect();
-      const x = (e.clientX - r.left) * (current.w / r.width);
-      const y = (e.clientY - r.top) * (current.h / r.height);
+      const scale = Math.min(r.width / current.w, r.height / current.h);
+      const offX = (r.width - current.w * scale) / 2;
+      const offY = (r.height - current.h * scale) / 2;
+      const x = (e.clientX - r.left - offX) / scale;
+      const y = (e.clientY - r.top - offY) / scale;
       calPts.push({ x, y });
       if (calPts.length === 1) {
         $('calHint').textContent = 'คลิกจุดที่สองของมาตราอ้างอิง';
@@ -749,11 +787,11 @@
       if (serialPort) { try { await serialPort.close(); } catch (e) { /* ignore */ } }
       serialReader = null; serialPort = null;
       $('serialBtn').textContent = 'เชื่อมเครื่อง ECA';
-      $('serialStatus').textContent = 'หยุดอ่านข้อมูลแล้ว';
+      setSerial('หยุดอ่านข้อมูลแล้ว');
       return;
     }
     if (!('serial' in navigator)) {
-      $('serialStatus').textContent = 'เบราว์เซอร์นี้ไม่รองรับ WebSerial — ใช้ Chrome หรือ Edge';
+      setSerial('เบราว์เซอร์นี้ไม่รองรับ WebSerial — ใช้ Chrome หรือ Edge');
       return;
     }
     try {
@@ -761,7 +799,7 @@
       await serialPort.open({ baudRate: 9600 });
       serialReading = true;
       $('serialBtn').textContent = 'หยุดอ่านเครื่อง';
-      $('serialStatus').textContent = 'เชื่อมต่อแล้ว — รอข้อมูล V/I';
+      setSerial('เชื่อมต่อแล้ว — รอข้อมูล V/I');
       serialReader = serialPort.readable.getReader();
       const decoder = new TextDecoder();
       let buf = '';
@@ -778,13 +816,13 @@
           zones[0].v = p.v.toFixed(3);
           zones[0].i = p.i.toFixed(4);
           renderZones(); renderChart(); renderFea();
-          $('serialStatus').textContent = 'V=' + p.v + ' I=' + p.i + ' R=' + (p.v / p.i).toFixed(3) + ' Ω';
+          setSerial('V=' + p.v + ' I=' + p.i + ' R=' + (p.v / p.i).toFixed(3) + ' Ω');
           saveSession();
         });
       }
     } catch (e) {
       serialReading = false;
-      $('serialStatus').textContent = 'เชื่อมต่อไม่ได้: ' + e.message;
+      setSerial('เชื่อมต่อไม่ได้: ' + e.message);
       $('serialBtn').textContent = 'เชื่อมเครื่อง ECA';
     }
   }
@@ -803,6 +841,7 @@
       out.getContext('2d').drawImage(current.canvas, 0, 0);
       $('empty').style.display = 'none';
       setStatus('โหลดภาพแล้ว (' + current.w + '×' + current.h + ') — กด "วิเคราะห์ภาพ"');
+      if ($('imgDim')) $('imgDim').textContent = current.w + ' × ' + current.h + ' px';
       $('detBadge').textContent = '—';
       $('sPores').textContent = '–'; $('sIncl').textContent = '–';
       $('sPct').textContent = '–'; $('sMax').textContent = '–';
@@ -881,6 +920,19 @@
 
   renderZones(); renderRca(); renderChart(); renderFea(); renderBatch();
   restoreSession();
+  updateChrome();
+
+  document.querySelectorAll('.navitem').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+  document.addEventListener('keydown', e => {
+    if (!e.altKey) return;
+    const i = parseInt(e.key, 10) - 1;
+    if (i >= 0 && i < VIEW_ORDER.length) { e.preventDefault(); setView(VIEW_ORDER[i]); }
+  });
+  setView('analyze');
+
+  if (typeof SAMPLES !== 'undefined' && SAMPLES.om_raw) {
+    setImage(SAMPLES.om_raw).then(() => setTimeout(analyze, 120));
+  }
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));

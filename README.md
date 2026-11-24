@@ -1,4 +1,4 @@
-# AluSight v2 — Production Ready
+# AluSight — Production Ready
 
 **AI-Powered Aluminum Defect Inspection** — ตรวจจับรูพรุน/รอยบกพร่องในอะลูมิเนียมหล่อ ด้วยกล้องจุลทรรศน์ (OM) + Eddy Current Array (ECA) + Root Cause Analysis
 
@@ -64,7 +64,7 @@ styles.css            tokens light/dark, focus, reduced-motion, print CSS
 app.js                image pipeline, zones, chart, FEA, RCA, persistence,
                       calibration, batch, WebSerial, import/export, SW register
 samples.js            ภาพตัวอย่าง base64
-sw.js                 service worker (cache alusight-v2-r2)
+sw.js                 service worker (cache alusight-console-r2)
 manifest.webmanifest  PWA manifest
 dashboard.html        dashboard เดิม
 README.md             ไฟล์นี้
@@ -75,5 +75,5 @@ README.md             ไฟล์นี้
 ```bash
 git add -A && git commit -m "..." && git push origin master:main
 vercel deploy --prod --yes
-# ตรวจสอบ: curl -s https://alusight.vercel.app | grep 'AluSight v2'
+# ตรวจสอบ: curl -s https://alusight.vercel.app | grep 'AluSight'
 ```

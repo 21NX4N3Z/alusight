@@ -1,4 +1,4 @@
-const CACHE = 'alusight-v2-r2';
+const CACHE = 'alusight-console-r2';
 const ASSETS = [
   './',
   './index.html',
