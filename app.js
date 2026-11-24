@@ -902,7 +902,7 @@
   theme.addEventListener('click', () => {
     const dark = document.documentElement.classList.toggle('dark');
     theme.setAttribute('aria-checked', String(dark));
-    $('themeLabel').textContent = dark ? 'โหมดมืด' : 'โหมดสว่าง';
+    $('themeLabel').textContent = dark ? 'มืด' : 'สว่าง';
     renderChart(); renderFea();
     if (pores.length) { drawOverlay(); drawPoreMap(); }
     saveSession();
